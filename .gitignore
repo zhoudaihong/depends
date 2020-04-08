@@ -2,6 +2,7 @@
 *.swp
 *.class
 *.log
+*.iml
 .idea/
 out/
 data/
