@@ -44,7 +44,7 @@ public class MacroEhcacheRepo extends MacroRepo {
 		Map<String, String> macros = get(fileFullPath);
 		macros.putAll(macroMap);
 		for (IASTPreprocessorMacroDefinition def : macroDefinitions) {
-			macros.put(def.getName().toString(), new String(def.getExpansion()));
+			macros.put(def.getName().getBinding().toString(), new String(def.getExpansion()));
 		}
 		Element cacheElement = new Element(buildKey(fileId), macros);
 		cache.put(cacheElement);

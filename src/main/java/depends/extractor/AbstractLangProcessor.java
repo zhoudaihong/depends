@@ -128,8 +128,8 @@ abstract public class AbstractLangProcessor {
 			System.gc();
 			logger.info("Heap Information: " + ManagementFactory.getMemoryMXBean().getHeapMemoryUsage());
 		}
-		identifyDependencies();
-		logger.info("Dependencie data generating done successfully...");
+//		identifyDependencies();
+//		logger.info("Dependencie data generating done successfully...");
 	}
 
 	private void markAllEntitiesScope() {
@@ -162,7 +162,7 @@ abstract public class AbstractLangProcessor {
 	private void identifyDependencies() {
 		System.out.println("dependencie data generating...");
 		dependencyMatrix = dependencyGenerator.build(entityRepo, typeFilter);
-		entityRepo = null;
+//		entityRepo = null;
 		System.out.println("reorder dependency matrix...");
 		dependencyMatrix = new OrderedMatrixGenerator(dependencyMatrix).build();
 		System.out.println("Dependencie data generating done successfully...");

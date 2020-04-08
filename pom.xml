@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>cn.emergentdesign.se</groupId>
@@ -84,7 +84,7 @@
 		<dependency>
 			<groupId>eclipse-photon</groupId>
 			<artifactId>org.eclipse.core.resources</artifactId>
-			<version>3.13.500.v20190819-0800</version>
+			<version>3.13.700.v20200209-1624</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -123,37 +123,37 @@
 		<dependency>
 			<groupId>org.eclipse.cdt</groupId>
 			<artifactId>org.eclipse.cdt.core</artifactId>
-			<version>6.9.0.201909091953</version>
+			<version>6.11.0.202003081657</version>
 		</dependency>
 		<dependency>
 			<groupId>eclipse-photon</groupId>
 			<artifactId>org.eclipse.equinox.registry</artifactId>
-			<version>3.8.500.v20190714-1850</version>
+			<version>3.8.700.v20200121-1457</version>
 		</dependency>
 		<dependency>
 			<groupId>eclipse-photon</groupId>
 			<artifactId>org.eclipse.core.runtime</artifactId>
-			<version>3.14.0.v20180417-0825</version>
+			<version>3.17.100.v20200203-0917</version>
 		</dependency>
 		<dependency>
 			<groupId>eclipse-photon</groupId>
 			<artifactId>org.eclipse.equinox.common</artifactId>
-			<version>3.10.500.v20190815-1535</version>
+			<version>3.11.0.v20200206-0817</version>
 		</dependency>
 		<dependency>
 			<groupId>eclipse-photon</groupId>
 			<artifactId>org.eclipse.osgi</artifactId>
-			<version>3.15.0.v20190830-1434</version>
+			<version>3.15.200.v20200214-1600</version>
 		</dependency>
 		<dependency>
 			<groupId>eclipse-photon</groupId>
 			<artifactId>org.eclipse.equinox.preferences</artifactId>
-			<version>3.7.500.v20190815-1535</version>
+			<version>3.7.700.v20191213-1901</version>
 		</dependency>
 		<dependency>
 			<groupId>eclipse-photon</groupId>
 			<artifactId>org.eclipse.core.jobs</artifactId>
-			<version>3.10.500.v20190620-1426</version>
+			<version>3.10.700.v20200106-1020</version>
 		</dependency>
 		<dependency>
 			<groupId>info.picocli</groupId>
@@ -182,10 +182,15 @@
 			<version>0.5.5-SNAPSHOT</version>
 		</dependency>
 
-		  <dependency>
-		      <groupId>net.sf.ehcache</groupId>
-		      <artifactId>ehcache-core</artifactId>
+		<dependency>
+			<groupId>net.sf.ehcache</groupId>
+			<artifactId>ehcache-core</artifactId>
 			<version>2.5.1</version>
-		  </dependency>
+		</dependency>
+		<dependency>
+			<groupId>depends</groupId>
+			<artifactId>antlr4</artifactId>
+			<version>final</version>
+		</dependency>
 	</dependencies>
 </project>
