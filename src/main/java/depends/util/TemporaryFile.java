@@ -4,24 +4,43 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import depends.util.FileTraversal.IFileVisitor;
 
 public class TemporaryFile {
 	Path tempDirWithPrefix;
-	private static TemporaryFile _inst = null;
+	private static Map<Long, TemporaryFile> _insts = new ConcurrentHashMap<>();
 	public static void reset() {
-		_inst=null;
+		for(TemporaryFile _inst : _insts.values()) {
+			_inst.delete();
+		}
+		_insts.clear();
 	}
+
+	public static void resetCurrentThread() {
+		long currentThreadId = Thread.currentThread().getId();
+		TemporaryFile _inst = _insts.get(currentThreadId);
+		if(_inst != null) {
+			_inst.delete();
+			_insts.remove(currentThreadId);
+		}
+	}
+
 	public static TemporaryFile getInstance() {
-		if (_inst==null)
-			_inst = new TemporaryFile();
+		long currentThreadId = Thread.currentThread().getId();
+		TemporaryFile _inst = _insts.get(currentThreadId);
+		if(_inst == null) {
+			_inst = new TemporaryFile(currentThreadId);
+			_insts.put(currentThreadId, _inst);
+		}
 		return _inst;
 	}
-	
-	private TemporaryFile() {
+
+	private TemporaryFile(long threadId) {
 		try {
-			tempDirWithPrefix = Files.createTempDirectory("depends.tmp");
+			tempDirWithPrefix = Files.createTempDirectory("depends_" + threadId + ".tmp");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -34,7 +53,7 @@ public class TemporaryFile {
 	public String macroPath(Integer fileId) {
 		return tempDirWithPrefix.toAbsolutePath().toFile() + File.separator + fileId + ".macros";
 	}
-	
+
 	public void delete() {
 		if (tempDirWithPrefix==null) return;
 		IFileVisitor visitor = new IFileVisitor() {

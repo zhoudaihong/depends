@@ -30,6 +30,7 @@ import java.util.List;
 import depends.entity.CandidateTypes;
 import depends.entity.Entity;
 import depends.entity.FileEntity;
+import depends.entity.PackageEntity;
 import depends.entity.TypeEntity;
 import depends.entity.repo.EntityRepo;
 import depends.matrix.core.DependencyMatrix;
@@ -86,8 +87,9 @@ public class FileDependencyGenerator extends DependencyGenerator{
 
 	private int getFileEntityIdNoException(EntityRepo entityRepo, Entity entity) {
 		Entity ancestor = entity.getAncestorOfType(FileEntity.class);
-		if (ancestor==null)
+		if (ancestor==null) {
 			return -1;
+		}
 		if (!ancestor.inScope()) return -1;
 		return ancestor.getId();
 	}

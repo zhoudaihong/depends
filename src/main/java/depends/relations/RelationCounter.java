@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import depends.deptypes.DependencyType;
+import depends.entity.AliasEntity;
 import depends.entity.ContainerEntity;
 import depends.entity.Entity;
 import depends.entity.Expression;
@@ -86,8 +87,6 @@ public class RelationCounter {
 	
 
 	private void computeContainerRelations(ContainerEntity entity) {
-		entity.reloadExpression(repo);
-		entity.resolveExpressions(inferer);
 		for (VarEntity var:entity.getVars()) {
 			if (var.getType()!=null)
 				entity.addRelation(buildRelation(DependencyType.CONTAIN,var.getType()));
@@ -105,15 +104,18 @@ public class RelationCounter {
 			entity.addRelation(buildRelation(DependencyType.MIXIN,mixin));
 		}
 		
+		entity.reloadExpression(repo);
+		if (!inferer.isEagerExpressionResolve())
+		{
+			entity.resolveExpressions(inferer);
+		}
 		for (Expression expression:entity.expressionList()){
-			if (expression.isStatement) {
+			if (expression.isStatement()) {
 				continue;
 			}
 			Entity referredEntity = expression.getReferredEntity();
 			addRelationFromExpression(entity, expression, referredEntity);
 		}
-		
-
 		entity.clearExpressions();
 	}
 
@@ -124,11 +126,12 @@ public class RelationCounter {
 		}
 
 		if (referredEntity instanceof MultiDeclareEntities) {
-			for (ContainerEntity e:((MultiDeclareEntities)referredEntity).getEntities()) {
+			for (Entity e:((MultiDeclareEntities)referredEntity).getEntities()) {
 				addRelationFromExpression(entity,expression,e);
 			}
 			return;
 		}
+		
 		boolean matched = false;
 		if (expression.isCall()) {
 			/* if it is a FunctionEntityProto, add Relation to all Impl Entities*/
@@ -136,7 +139,7 @@ public class RelationCounter {
 				Entity multiDeclare = repo.getEntity(referredEntity.getQualifiedName());
 				if (multiDeclare instanceof MultiDeclareEntities) {
 					MultiDeclareEntities m = (MultiDeclareEntities)multiDeclare;
-					List<ContainerEntity> entities = m.getEntities().stream().filter(item->(item instanceof FunctionEntityImpl))
+					List<Entity> entities = m.getEntities().stream().filter(item->(item instanceof FunctionEntityImpl))
 					.collect(Collectors.toList());
 					for (Entity e:entities) {
 						entity.addRelation(buildRelation(DependencyType.IMPLLINK,e));
@@ -148,15 +151,15 @@ public class RelationCounter {
 			matched = true;
 
 		}
-		if (expression.isCreate) {
+		if (expression.isCreate()) {
 			entity.addRelation(buildRelation(DependencyType.CREATE,referredEntity));
 			matched = true;
 		}
-		if (expression.isThrow) {
+		if (expression.isThrow()) {
 			entity.addRelation(buildRelation(DependencyType.THROW,referredEntity));
 			matched = true;
 		}
-		if (expression.isCast) { 
+		if (expression.isCast()) { 
 			entity.addRelation(buildRelation(DependencyType.CAST,referredEntity));
 			matched = true;
 		}
@@ -180,6 +183,12 @@ public class RelationCounter {
 	}
 
 	private Relation buildRelation(String type, Entity referredEntity) {
+		if (referredEntity instanceof AliasEntity) {
+			AliasEntity alias = ((AliasEntity) referredEntity);
+			if (alias.getReferToEntityTillNoAlias()!=null) {
+				referredEntity = alias.getReferToEntityTillNoAlias();
+			}
+		}
 		if (this.langProcessor==null)
 			return new Relation(type,referredEntity);
 		return new Relation(langProcessor.getRelationMapping(type),referredEntity);

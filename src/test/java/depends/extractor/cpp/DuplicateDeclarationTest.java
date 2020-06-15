@@ -7,6 +7,9 @@ import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 
+import depends.deptypes.DependencyType;
+import depends.entity.Entity;
+
 public class DuplicateDeclarationTest extends CppParserTest {
 	 @Before
 	    public void setUp() {
@@ -25,7 +28,13 @@ public class DuplicateDeclarationTest extends CppParserTest {
 				    parser.parse();
 			    }
 			    inferer.resolveAllBindings();
-		        assertEquals(8,repo.getEntity("X.invoke").getRelations().size());
+			    Entity e = repo.getEntity("X.invoke");
+			    this.assertContainsRelation(e, DependencyType.CONTAIN,"DupClass");
+			    this.assertContainsRelation(e, DependencyType.CALL,"DupClass");
+			    this.assertContainsRelation(e, DependencyType.CREATE,"DupClass");
+			    this.assertContainsRelation(e, DependencyType.USE,"DupClass");
+			    this.assertContainsRelation(e, DependencyType.USE,"X.invoke.c");
+			    			    
 		}
 
 

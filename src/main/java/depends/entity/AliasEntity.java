@@ -26,7 +26,9 @@ package depends.entity;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import depends.relations.Inferer;
 
@@ -43,6 +45,7 @@ public class AliasEntity extends Entity {
 	}
 
 	public void inferLocalLevelEntities(Inferer inferer) {
+		if (!(referToEntity instanceof EmptyTypeEntity)) return;
 		Entity entity = inferer.resolveName(this, originName, true);
 		while(entity instanceof AliasEntity) {
 			AliasEntity aliasEntity = (AliasEntity)entity;
@@ -97,14 +100,14 @@ public class AliasEntity extends Entity {
 		return origin.lookupFunctionLocally(functionName);
 	}
 
-	public FunctionEntity lookupFunctionInVisibleScope(GenericName functionName) {
+	public List<Entity> lookupFunctionInVisibleScope(GenericName functionName) {
 		if (!(referToEntity instanceof ContainerEntity))
 			return null;
 		ContainerEntity origin = (ContainerEntity) referToEntity;
 		return origin.lookupFunctionInVisibleScope(functionName);
 	}
 
-	public VarEntity lookupVarsInVisibleScope(GenericName varName) {
+	public Entity lookupVarsInVisibleScope(GenericName varName) {
 		if (!(referToEntity instanceof ContainerEntity))
 			return null;
 		ContainerEntity origin = (ContainerEntity) referToEntity;
@@ -163,6 +166,26 @@ public class AliasEntity extends Entity {
 
 	public Entity getOriginType() {
 		return referToEntity;
+	}
+	public Entity getReferToEntity() {
+		return referToEntity;
+	}
+	public void setReferToEntity(Entity referToEntity) {
+		this.referToEntity = referToEntity;
+	}
+	public Entity getReferToEntityTillNoAlias() {
+		Set<Entity> searched = new HashSet<>();
+		int i=0;
+		Entity current = this;
+		while(i<100) { //maximum 100 levels
+			if (searched.contains(current)) return current; //with a loop
+			if (!(current instanceof AliasEntity)) return current;
+			searched.add(current);
+			current = ((AliasEntity)current).getReferToEntity();
+			if (current ==null) return this;
+			i++;
+		}
+		return current;
 	}
 	
 

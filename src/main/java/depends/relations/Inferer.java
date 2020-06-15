@@ -50,7 +50,6 @@ import depends.importtypes.Import;
 
 public class Inferer {
 	static final public TypeEntity buildInType = new TypeEntity(GenericName.build("built-in"), null, -1);
-	static final public TypeEntity externalType = new TypeEntity(GenericName.build("external"), null, -2);
 	static final public TypeEntity genericParameterType = new TypeEntity(GenericName.build("T"), null, -3);
 	private BuiltInType buildInTypeManager = new NullBuiltInType();
 	private ImportLookupStrategy importLookupStrategy;
@@ -59,6 +58,7 @@ public class Inferer {
 
 	private boolean eagerExpressionResolve = false;
 	private boolean isCollectUnsolvedBindings = false;
+	private boolean isDuckTypingDeduce = true;
 	private static Logger logger = LoggerFactory.getLogger(Inferer.class);
 
 	public Inferer(EntityRepo repo, ImportLookupStrategy importLookupStrategy, BuiltInType buildInTypeManager, boolean eagerExpressionResolve) {
@@ -76,20 +76,20 @@ public class Inferer {
 	 * @param langProcessor 
 	 */
 	public  Set<UnsolvedBindings> resolveAllBindings(boolean callAsImpl, AbstractLangProcessor langProcessor) {
-		System.out.println("Resolve type bindings....");
+//		System.out.println("Resolve type bindings....");
 		if (logger.isInfoEnabled()) {
 			logger.info("Resolve type bindings...");
 		}
 		resolveTypes();
-		System.out.println("Dependency analaysing....");
+//		System.out.println("Dependency analaysing....");
 		if (logger.isInfoEnabled()) {
 			logger.info("Dependency analaysing...");
-			System.gc();
 		}
 		logger.info("Heap Information: " + ManagementFactory.getMemoryMXBean().getHeapMemoryUsage());
 		
 		new RelationCounter(repo.getFileEntities(),this,repo,callAsImpl,langProcessor).computeRelations();
-		System.out.println("Dependency done....");
+//		System.out.println("Dependency done....");
+		logger.info("Dependency done....");
 		return unsolvedSymbols;		
 	}
 
@@ -172,8 +172,7 @@ public class Inferer {
 	public Entity resolveName(Entity fromEntity, GenericName rawName, boolean searchImport) {
 		if (rawName==null) return null;
 		Entity entity = resolveNameInternal(fromEntity,rawName,searchImport);
-		if (entity==null ||
-				entity.equals(externalType)) {
+		if (entity==null ) {
 			if (!this.buildInTypeManager.isBuiltInType(rawName.getName())) {
 				addUnsolvedBinding(new UnsolvedBindings(rawName.getName(), fromEntity));
 			}
@@ -202,7 +201,7 @@ public class Inferer {
 		if (fromEntity==null) return null;
 		do {
 			entity = lookupEntity(fromEntity, name, searchImport);
-			if (entity!=null && !entity.equals(externalType)) {
+			if (entity!=null ) {
 				break;
 			}
 			if (importLookupStrategy.supportGlobalNameLookup()) {
@@ -284,7 +283,7 @@ public class Inferer {
 		Entity type = importLookupStrategy.lookupImportedType(name, fileEntity, repo,this);
 		if (type != null)
 			return type;
-		return externalType;
+		return null;
 	}
 
 
@@ -314,6 +313,11 @@ public class Inferer {
 	 * @return
 	 */
 	public List<TypeEntity> calculateCandidateTypes(VarEntity fromEntity, List<FunctionCall> functionCalls) {
+		if (buildInTypeManager.isBuildInTypeMethods(functionCalls)) {
+			return new ArrayList<>();
+		}
+		if (!isDuckTypingDeduce) 
+			return new ArrayList<>();
 		return searchTypesInRepo(fromEntity, functionCalls);
 	}
 
@@ -322,11 +326,12 @@ public class Inferer {
 		Iterator<Entity> iterator = repo.sortedFileIterator();
 		while(iterator.hasNext()) {
 			Entity f = iterator.next();
-			if (f instanceof FileEntity)
-			for (TypeEntity type:((FileEntity)f).getDeclaredTypes()) {
-				FunctionMatcher functionMatcher = new FunctionMatcher(type.getFunctions());
-				if (functionMatcher.containsAll(functionCalls)) {
-					types.add(type);
+			if (f instanceof FileEntity) {
+				for (TypeEntity type:((FileEntity)f).getDeclaredTypes()) {
+					FunctionMatcher functionMatcher = new FunctionMatcher(type.getFunctions());
+					if (functionMatcher.containsAll(functionCalls)) {
+						types.add(type);
+					}
 				}
 			}
 		}
@@ -340,6 +345,16 @@ public class Inferer {
 	public void setCollectUnsolvedBindings(boolean isCollectUnsolvedBindings) {
 		this.isCollectUnsolvedBindings  = isCollectUnsolvedBindings;
 	}
+
+	public EntityRepo getRepo() {
+		return repo;
+	}
+
+	public void setDuckTypingDeduce(boolean isDuckTypingDeduce) {
+		this.isDuckTypingDeduce = isDuckTypingDeduce;
+	}
+	
+
 
 
 }

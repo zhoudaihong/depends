@@ -116,6 +116,7 @@ public abstract class ContainerEntity extends DecoratedEntity {
 	public void addExpression(Object key, Expression expression) {
 		expressions().put(key, expression);
 		expressionList().add(expression);
+		expressionCount = expressionList.size();
 	}
 
 	public boolean containsExpression(Object key) {
@@ -128,15 +129,21 @@ public abstract class ContainerEntity extends DecoratedEntity {
 	public void inferLocalLevelEntities(Inferer inferer) {
 		super.inferLocalLevelEntities(inferer);
 		for (VarEntity var : this.vars()) {
-			var.inferLocalLevelEntities(inferer);
+			if (var.getParent()!=this) {
+				var.inferLocalLevelEntities(inferer);
+			}
 		}
 		for (FunctionEntity func : this.getFunctions()) {
-			func.inferLocalLevelEntities(inferer);
+			if (func.getParent()!=this) {
+				func.inferLocalLevelEntities(inferer);
+			}
+		}
+		if (inferer.isEagerExpressionResolve()) {
+			reloadExpression(inferer.getRepo());
+			resolveExpressions(inferer);
+			cacheExpressions();
 		}
 		resolvedMixins = identiferToContainerEntity(inferer, getMixins());
-		if (inferer.isEagerExpressionResolve()) {
-			this.resolveExpressions(inferer);
-		}
 	}
 
 	private Collection<GenericName> getMixins() {
@@ -165,13 +172,18 @@ public abstract class ContainerEntity extends DecoratedEntity {
 	 * @param inferer
 	 */
 	public void resolveExpressions(Inferer inferer) {
+		
+		if (this instanceof FunctionEntity) {
+			((FunctionEntity)this).linkReturnToLastExpression();
+		}
+		
 		if (expressionList==null) return;
 		if(expressionList.size()>10000) return;
 		for (Expression expression : expressionList) {
 			// 1. if expression's type existed, break;
 			if (expression.getType() != null)
 				continue;
-			if (expression.isDot) { // wait for previous
+			if (expression.isDot()) { // wait for previous
 				continue;
 			}
 			if (expression.getRawType() == null && expression.getIdentifier() == null)
@@ -189,12 +201,13 @@ public abstract class ContainerEntity extends DecoratedEntity {
 				Entity entity = inferer.resolveName(this, expression.getIdentifier(), true);
 				String composedName = expression.getIdentifier().toString();
 				Expression theExpr = expression;
-				if (Inferer.externalType.equals(entity)) {
-					while(theExpr.getParent()!=null && theExpr.getParent().isDot) {
+				if (entity==null) {
+					while(theExpr.getParent()!=null && theExpr.getParent().isDot()) {
 						theExpr = theExpr.getParent();
+						if (theExpr.getIdentifier()==null) break;
 						composedName = composedName + "." + theExpr.getIdentifier().toString();
 						entity = inferer.resolveName(this, GenericName.build(composedName), true);
-						if (entity!=null && !Inferer.externalType.equals(entity))
+						if (entity!=null)
 							break;
 					}
 				}
@@ -203,13 +216,15 @@ public abstract class ContainerEntity extends DecoratedEntity {
 					continue;
 				}
 				if (expression.isCall()) {
-					FunctionEntity func = this.lookupFunctionInVisibleScope(expression.getIdentifier());
-					if (func != null) {
-						expression.setType(func.getType(), func, inferer);
+					List<Entity> funcs = this.lookupFunctionInVisibleScope(expression.getIdentifier());
+					if (funcs != null) {
+						for (Entity func:funcs) {
+							expression.setType(func.getType(), func, inferer);
+						}
 					}
 				} else {
 
-					VarEntity varEntity = this.lookupVarInVisibleScope(expression.getIdentifier());
+					Entity varEntity = this.lookupVarInVisibleScope(expression.getIdentifier());
 					if (varEntity != null) {
 						expression.setType(varEntity.getType(), varEntity, inferer);
 					}
@@ -250,7 +265,6 @@ public abstract class ContainerEntity extends DecoratedEntity {
 	}
 	
 	private void cacheExpressionListToFile() {
-		expressionCount = this.expressionList.size();
 		if (expressionCount ==0) return;
 		try {
 			FileOutputStream fileOut = new FileOutputStream(TemporaryFile.getInstance().exprPath(this.id));
@@ -283,15 +297,6 @@ public abstract class ContainerEntity extends DecoratedEntity {
 	      }
 	}
 	
-	public TypeEntity getLastExpressionType() {
-		if (expressionList==null) return null;
-		for (int i = this.expressionList.size() - 1; i >= 0; i--) {
-			Expression expr = this.expressionList.get(i);
-			if (expr.isStatement)
-				return expr.getType();
-		}
-		return null;
-	}
 
 	public List<Expression> expressionList() {
 		if (expressionList==null) 
@@ -302,17 +307,6 @@ public abstract class ContainerEntity extends DecoratedEntity {
 	public boolean containsExpression() {
 		return expressions().size() > 0;
 	}
-
-	public String dumpExpressions() {
-		if (expressionList==null) return "";
-		StringBuilder sb = new StringBuilder();
-		for (Expression exp : expressionList) {
-			sb.append(exp.toString()).append("\n");
-		}
-		return sb.toString();
-	}
-
-
 	
 	/**
 	 * The entry point of lookup functions. It will treat multi-declare entities and
@@ -323,16 +317,23 @@ public abstract class ContainerEntity extends DecoratedEntity {
 	 * @param functionName
 	 * @return
 	 */
-	public FunctionEntity lookupFunctionInVisibleScope(GenericName functionName) {
+	public List<Entity> lookupFunctionInVisibleScope(GenericName functionName) {
+		List<Entity> functions = new ArrayList<>();
 		if (this.getMutliDeclare() != null) {
-			for (ContainerEntity fromEntity : this.getMutliDeclare().getEntities()) {
-				FunctionEntity f = lookupFunctionBottomUpTillTopContainer(functionName, fromEntity);
-				if (f != null)
-					return f;
+			for (Entity fromEntity : this.getMutliDeclare().getEntities()) {
+				Entity f = lookupFunctionBottomUpTillTopContainer(functionName, fromEntity);
+				if (f != null) {
+					functions.add(f);
+					return functions;
+				}
 			}
 		} else {
 			ContainerEntity fromEntity = this;
-			return lookupFunctionBottomUpTillTopContainer(functionName, fromEntity);
+			Entity f = lookupFunctionBottomUpTillTopContainer(functionName, fromEntity);
+			if (f != null) {
+				functions.add(f);
+				return functions;
+			}
 		}
 		return null;
 	}
@@ -344,12 +345,18 @@ public abstract class ContainerEntity extends DecoratedEntity {
 	 * @param fromEntity
 	 * @return
 	 */
-	private FunctionEntity lookupFunctionBottomUpTillTopContainer(GenericName functionName, ContainerEntity fromEntity) {
+	private Entity lookupFunctionBottomUpTillTopContainer(GenericName functionName, Entity fromEntity) {
 		while (fromEntity != null) {
 			if (fromEntity instanceof ContainerEntity) {
 				FunctionEntity func = ((ContainerEntity) fromEntity).lookupFunctionLocally(functionName);
 				if (func != null)
 					return func;
+			}
+			for (Entity child:this.getChildren()) {
+				if (child instanceof AliasEntity) {
+					if (child.getRawName().equals(functionName))
+						return child;
+				}
 			}
 			fromEntity = (ContainerEntity) this.getAncestorOfType(ContainerEntity.class);
 		}
@@ -380,7 +387,7 @@ public abstract class ContainerEntity extends DecoratedEntity {
 	 * @param varName
 	 * @return
 	 */
-	public VarEntity lookupVarInVisibleScope(GenericName varName) {
+	public Entity lookupVarInVisibleScope(GenericName varName) {
 		ContainerEntity fromEntity = this;
 		return lookupVarBottomUpTillTopContainer(varName, fromEntity);
 	}
@@ -392,12 +399,18 @@ public abstract class ContainerEntity extends DecoratedEntity {
 	 * @param varName
 	 * @return
 	 */
-	private VarEntity lookupVarBottomUpTillTopContainer(GenericName varName, ContainerEntity fromEntity) {
+	private Entity lookupVarBottomUpTillTopContainer(GenericName varName, ContainerEntity fromEntity) {
 		while (fromEntity != null) {
 			if (fromEntity instanceof ContainerEntity) {
 				VarEntity var = ((ContainerEntity) fromEntity).lookupVarLocally(varName);
 				if (var != null)
 					return var;
+			}
+			for (Entity child:this.getChildren()) {
+				if (child instanceof AliasEntity) {
+					if (child.getRawName().equals(varName))
+						return child;
+				}
 			}
 			fromEntity = (ContainerEntity) this.getAncestorOfType(ContainerEntity.class);
 		}

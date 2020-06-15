@@ -62,7 +62,7 @@ import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTVisibilityLabel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import depends.entity.FunctionEntity;
+import depends.entity.Entity;
 import depends.entity.GenericName;
 import depends.entity.VarEntity;
 import depends.entity.repo.EntityRepo;
@@ -98,8 +98,6 @@ public class CppVisitor  extends ASTVisitor {
 
 	@Override
 	public int visit(IASTTranslationUnit tu) {
-		context.doneFile(context.currentFile());
-
 		for (String incl:preprocessorHandler.getDirectIncludedFiles(tu.getAllPreprocessorStatements(),context.currentFile().getQualifiedName())) {
 			context.foundNewImport(new FileImport(incl));
 		}
@@ -124,7 +122,10 @@ public class CppVisitor  extends ASTVisitor {
 	@Override
 	public int visit(IASTProblem problem) {
 		if (notLocalFile(problem)) return ASTVisitor.PROCESS_SKIP;
-		System.out.println("warning: parse error " + problem.getOriginalNode().getRawSignature() + problem.getMessageWithLocation());
+		if (logger.isDebugEnabled()) {
+			logger.debug("warning: parse error " + problem.getOriginalNode().getRawSignature() + problem.getMessageWithLocation());
+		}
+//		System.out.println("warning: parse error " + problem.getOriginalNode().getRawSignature() + problem.getMessageWithLocation());
 		return super.visit(problem);
 	}
 
@@ -205,9 +206,9 @@ public class CppVisitor  extends ASTVisitor {
 				IASTSimpleDeclaration decl = (IASTSimpleDeclaration)(declarator.getParent());
 				returnType = buildGenericNameFromDeclSpecifier(decl.getDeclSpecifier());
 				String rawName = ASTStringUtilExt.getName(declarator);
-				FunctionEntity namedEntity = context.currentFile().lookupFunctionInVisibleScope(GenericName.build(rawName));
+				List<Entity> namedEntity = context.currentFile().lookupFunctionInVisibleScope(GenericName.build(rawName));
 				if (namedEntity!=null) {
-					rawName = namedEntity.getQualifiedName();
+					rawName = namedEntity.get(0).getQualifiedName();
 				}
 				returnType = reMapIfConstructDeconstruct(rawName,returnType);
 				context.foundMethodDeclaratorProto(rawName, returnType);
@@ -216,9 +217,9 @@ public class CppVisitor  extends ASTVisitor {
 				IASTFunctionDefinition decl = (IASTFunctionDefinition)declarator.getParent();
 				returnType = buildGenericNameFromDeclSpecifier(decl.getDeclSpecifier());
 				String rawName = ASTStringUtilExt.getName(declarator);
-				FunctionEntity namedEntity = context.currentFile().lookupFunctionInVisibleScope(GenericName.build(rawName));
+				List<Entity> namedEntity = context.currentFile().lookupFunctionInVisibleScope(GenericName.build(rawName));
 				if (namedEntity!=null) {
-					rawName = namedEntity.getQualifiedName();
+					rawName = namedEntity.get(0).getQualifiedName();
 				}
 				returnType = reMapIfConstructDeconstruct(rawName,returnType);
 				context.foundMethodDeclaratorImplementation(rawName, returnType);
@@ -260,7 +261,8 @@ public class CppVisitor  extends ASTVisitor {
 				if (rawName.equals(context.lastContainer().getRawName().getName())) {
 					context.exitLastedEntity();
 				}else {
-					System.err.println("unexpected symbol");
+					logger.debug("unexpected symbol");
+//					System.err.println("unexpected symbol");
 				}
 			}
 		}
@@ -295,7 +297,7 @@ public class CppVisitor  extends ASTVisitor {
 				IASTDeclSpecifier declSpecifier = ((IASTSimpleDeclaration) declaration).getDeclSpecifier();
 				//Found new typedef definition
 				if (declSpecifier.getStorageClass()==IASTDeclSpecifier.sc_typedef) {
-					context.foundNewTypeAlias(ASTStringUtilExt.getName(declarator),ASTStringUtilExt.getName(declSpecifier));
+					context.foundNewAlias(ASTStringUtilExt.getName(declarator),ASTStringUtilExt.getName(declSpecifier));
 				}else if (!(declarator instanceof IASTFunctionDeclarator)) {
 					String varType = ASTStringUtilExt.getName(declSpecifier);
 					String varName = ASTStringUtilExt.getName(declarator);
@@ -316,19 +318,22 @@ public class CppVisitor  extends ASTVisitor {
 		}else if (declaration instanceof CPPASTTemplateDeclaration){
 			
 		}else if (declaration instanceof CPPASTProblemDeclaration){
-			System.err.println("parsing error \n" + declaration.getRawSignature());
+			if (logger.isDebugEnabled()) {
+				logger.debug("parsing error \n" + declaration.getRawSignature());
+			}
+//			System.err.println("parsing error \n" + declaration.getRawSignature());
 		}else if (declaration instanceof ICPPASTAliasDeclaration){
 			IASTName name = ((ICPPASTAliasDeclaration)declaration).getAlias();
 			String alias = ASTStringUtilExt.getSimpleName(name).replace("::", ".");
 			ICPPASTTypeId mapped = ((ICPPASTAliasDeclaration)declaration).getMappingTypeId();
 			String originalName1 = ASTStringUtilExt.getTypeIdString(mapped);
-			context.foundNewTypeAlias(alias, originalName1);
+			context.foundNewAlias(alias, originalName1);
 		}else if (declaration instanceof CPPASTNamespaceAlias){
 			IASTName name = ((CPPASTNamespaceAlias)declaration).getAlias();
 			String alias = ASTStringUtilExt.getSimpleName(name).replace("::", ".");
 			IASTName mapped = ((CPPASTNamespaceAlias)declaration).getMappingName();
 			String originalName = ASTStringUtilExt.getName(mapped);
-			context.foundNewTypeAlias(alias, originalName);
+			context.foundNewAlias(alias, originalName);
 		}
 		else if(declaration instanceof CPPASTStaticAssertionDeclaration)
 		{
@@ -336,8 +341,12 @@ public class CppVisitor  extends ASTVisitor {
 		}else if (declaration instanceof CPPASTTemplateSpecialization) {
 		}
 		else{
-			System.out.println("not handled type: " + declaration.getClass().getName());
-			System.out.println(declaration.getRawSignature());
+			if (logger.isDebugEnabled()) {
+				logger.debug("not handled type: " + declaration.getClass().getName());
+				logger.debug(declaration.getRawSignature());
+			}
+//			System.out.println("not handled type: " + declaration.getClass().getName());
+//			System.out.println(declaration.getRawSignature());
 		}
 		return super.visit(declaration);
 	}	
@@ -371,5 +380,9 @@ public class CppVisitor  extends ASTVisitor {
 			//System.out.println("** parameterDeclaration = " + parameter);
 		}
 		return super.visit(parameterDeclaration);
+	}
+
+	public void done() {
+		context.done();
 	}
 }

@@ -156,22 +156,22 @@ public class Main {
 		dependencyGenerator.setFilenameRewritter(filenameWritter);
 		langProcessor.setDependencyGenerator(dependencyGenerator);
 		
-		langProcessor.buildDependencies(inputDir, includeDir,app.getTypeFilter(),supportImplLink,app.isOutputExternalDependencies());
+		langProcessor.buildDependencies(inputDir, includeDir,app.getTypeFilter(),supportImplLink,app.isOutputExternalDependencies(),app.isDuckTypingDeduce());
 		
 		
-		DependencyMatrix matrix = langProcessor.getDependencies();
-
-		if (app.getGranularity().startsWith("L")) {
-			matrix = new MatrixLevelReducer(matrix,app.getGranularity().substring(1)).shrinkToLevel();
-		}
-		DependencyDumper output = new DependencyDumper(matrix);
-		output.outputResult(outputName,outputDir,outputFormat);
-		if (app.isOutputExternalDependencies()) {
-			Set<UnsolvedBindings> unsolved = langProcessor.getExternalDependencies();
-	    	UnsolvedSymbolDumper unsolvedSymbolDumper = new UnsolvedSymbolDumper(unsolved,app.getOutputName(),app.getOutputDir(),
-	    			new LeadingNameStripper(app.isStripLeadingPath(),inputDir,app.getStrippedPaths()));
-	    	unsolvedSymbolDumper.output();
-		}
+//		DependencyMatrix matrix = langProcessor.getDependencies();
+//
+//		if (app.getGranularity().startsWith("L")) {
+//			matrix = new MatrixLevelReducer(matrix,app.getGranularity().substring(1)).shrinkToLevel();
+//		}
+//		DependencyDumper output = new DependencyDumper(matrix);
+//		output.outputResult(outputName,outputDir,outputFormat);
+//		if (app.isOutputExternalDependencies()) {
+//			Set<UnsolvedBindings> unsolved = langProcessor.getExternalDependencies();
+//	    	UnsolvedSymbolDumper unsolvedSymbolDumper = new UnsolvedSymbolDumper(unsolved,app.getOutputName(),app.getOutputDir(),
+//	    			new LeadingNameStripper(app.isStripLeadingPath(),inputDir,app.getStrippedPaths()));
+//	    	unsolvedSymbolDumper.output();
+//		}
 		long endTime = System.currentTimeMillis();
 		TemporaryFile.getInstance().delete();
 		CacheManager.create().shutdown();

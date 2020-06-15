@@ -110,14 +110,17 @@ abstract public class AbstractLangProcessor {
 	 * @param includeDir
 	 * @param inputDir
 	 * @param b 
+	 * @param b 
 	 */
-	public void buildDependencies(String inputDir, String[] includeDir, List<String> typeFilter, boolean callAsImpl, boolean isCollectUnsolvedBindings) {
+	public void buildDependencies(String inputDir, String[] includeDir, List<String> typeFilter, boolean callAsImpl, boolean isCollectUnsolvedBindings, boolean isDuckTypingDeduce) {
 		this.inputSrcPath = inputDir;
 		this.includeDirs = includeDir;
 		this.typeFilter = typeFilter;
 		this.inferer.setCollectUnsolvedBindings(isCollectUnsolvedBindings);
+		this.inferer.setDuckTypingDeduce(isDuckTypingDeduce);
 		logger.info("Start parsing files...");
 		parseAllFiles();
+		logger.info("all files procceed successfully...");
 		markAllEntitiesScope();
 		if (logger.isInfoEnabled()) {
 			logger.info("Resolve types and bindings of variables, methods and expressions.... " + this.inputSrcPath);
@@ -151,25 +154,26 @@ abstract public class AbstractLangProcessor {
 	 * @return unsolved bindings
 	 */
 	public void resolveBindings(boolean callAsImpl) {
-		System.out.println("Resolve types and bindings of variables, methods and expressions....");
+//		System.out.println("Resolve types and bindings of variables, methods and expressions....");
 		this.potentialExternalDependencies = inferer.resolveAllBindings(callAsImpl,this);
 		if (getExternalDependencies().size() > 0) {
 			System.out.println("There are " + getExternalDependencies().size() + " items are potential external dependencies.");
 		}
-		System.out.println("types and bindings resolved successfully...");
+		logger.info("types and bindings resolved successfully...");
+//		System.out.println("types and bindings resolved successfully...");
 	}
 
 	private void identifyDependencies() {
 		System.out.println("dependencie data generating...");
 		dependencyMatrix = dependencyGenerator.build(entityRepo, typeFilter);
-//		entityRepo = null;
+		entityRepo = null;
 		System.out.println("reorder dependency matrix...");
 		dependencyMatrix = new OrderedMatrixGenerator(dependencyMatrix).build();
 		System.out.println("Dependencie data generating done successfully...");
 	}
 
 	private final void parseAllFiles() {
-		System.out.println("Start parsing files...");
+//		System.out.println("Start parsing files...");
 		Set<String> phase2Files = new HashSet<>();
 		FileTraversal fileTransversal = new FileTraversal(new FileTraversal.IFileVisitor() {
 			@Override
@@ -192,7 +196,8 @@ abstract public class AbstractLangProcessor {
 		for (String f : phase2Files) {
 			parseFile(f);
 		}
-		System.out.println("all files procceed successfully...");
+
+//		System.out.println("all files procceed successfully...");
 
 	}
 
