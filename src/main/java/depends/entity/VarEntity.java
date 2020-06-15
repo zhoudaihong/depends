@@ -103,4 +103,14 @@ public class VarEntity extends ContainerEntity {
 			}
 		}
 	}
+	
+	private String typeIdentifier;
+	
+	public void setTypeIdentifier(String typeIdentifier) {
+		this.typeIdentifier = typeIdentifier;
+	}
+	
+	public String getTypeIdentifier() {
+		return typeIdentifier;
+	}
 }

@@ -66,18 +66,38 @@ public class FormalParameterListContextHelper {
 		if (context != null) {
 			if (context.formalParameter() != null) {
 				for (FormalParameterContext p : context.formalParameter()) {
-					foundParameterDefintion(p.typeType(),p.variableDeclaratorId().IDENTIFIER(),p.variableModifier());
+//					foundParameterDefintion(p.typeType(),p.variableDeclaratorId().IDENTIFIER(),p.variableModifier());
+					foundParamterDefintion(p);
 				}
 				if (context.lastFormalParameter()!=null) {
 					LastFormalParameterContext p = context.lastFormalParameter();
-					foundParameterDefintion(p.typeType(),p.variableDeclaratorId().IDENTIFIER(),p.variableModifier());
+//					foundParameterDefintion(p.typeType(),p.variableDeclaratorId().IDENTIFIER(),p.variableModifier());
+					foundParameterDefintion(p);
 				}
 			}
 		}
 		return;
 	}
 
-	private void foundParameterDefintion(TypeTypeContext typeType, TerminalNode identifier, List<VariableModifierContext> variableModifier) {
+	private void foundParamterDefintion(FormalParameterContext p) {
+		VarEntity parameter = foundParameterDefintion(p.typeType(),p.variableDeclaratorId().IDENTIFIER(),p.variableModifier());
+		StringBuilder typeIdentifier = new StringBuilder();
+		typeIdentifier.append(p.typeType().getText());
+		typeIdentifier.append(p.variableDeclaratorId().getText().replace(p.variableDeclaratorId().IDENTIFIER().getText(), ""));
+		parameter.setTypeIdentifier(typeIdentifier.toString());
+	}
+	
+	private void foundParameterDefintion(LastFormalParameterContext p) {
+		VarEntity parameter = foundParameterDefintion(p.typeType(),p.variableDeclaratorId().IDENTIFIER(),p.variableModifier());
+		StringBuilder typeIdentifier = new StringBuilder();
+		typeIdentifier.append(p.typeType().getText());
+		if(p.getText().contains("...")) {
+			typeIdentifier.append("...");
+		}
+		parameter.setTypeIdentifier(typeIdentifier.toString());
+	}
+
+	private VarEntity foundParameterDefintion(TypeTypeContext typeType, TerminalNode identifier, List<VariableModifierContext> variableModifier) {
 		GenericName type = GenericName.build(ClassTypeContextHelper.getClassName(typeType));
 		GenericName varName = GenericName.build(identifier.getText());
 		VarEntity varEntity = new VarEntity(varName,type,container,idGenerator.generateId());
@@ -88,7 +108,7 @@ public class FormalParameterListContextHelper {
 				this.annotations.add(QualitiedNameContextHelper.getName(modifier.annotation().qualifiedName()));
 			}
 		}
-
+		return varEntity;
 	}
 
 	public List<String> getAnnotations() {
