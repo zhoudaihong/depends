@@ -27,10 +27,7 @@ package depends.extractor;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.codehaus.plexus.util.FileUtils;
 import org.slf4j.Logger;
@@ -96,6 +93,7 @@ abstract public class AbstractLangProcessor {
 	private List<String> typeFilter;
 	private List<String> includePaths;
 	private static Logger logger = LoggerFactory.getLogger(AbstractLangProcessor.class);
+	public List<String> excludePaths;
 	
 	public AbstractLangProcessor(boolean eagerExpressionResolve) {
 		entityRepo = new InMemoryEntityRepo();
@@ -112,10 +110,11 @@ abstract public class AbstractLangProcessor {
 	 * @param b 
 	 * @param b 
 	 */
-	public void buildDependencies(String inputDir, String[] includeDir, List<String> typeFilter, boolean callAsImpl, boolean isCollectUnsolvedBindings, boolean isDuckTypingDeduce) {
+	public void buildDependencies(String inputDir, String[] includeDir, List<String> typeFilter, boolean callAsImpl, boolean isCollectUnsolvedBindings, boolean isDuckTypingDeduce, List<String> excludePaths) {
 		this.inputSrcPath = inputDir;
 		this.includeDirs = includeDir;
 		this.typeFilter = typeFilter;
+		this.excludePaths = excludePaths;
 		this.inferer.setCollectUnsolvedBindings(isCollectUnsolvedBindings);
 		this.inferer.setDuckTypingDeduce(isDuckTypingDeduce);
 		logger.info("Start parsing files...");
@@ -192,6 +191,7 @@ abstract public class AbstractLangProcessor {
 
 		});
 		fileTransversal.extensionFilter(this.fileSuffixes());
+		fileTransversal.setExcludePaths(this.excludePaths);
 		fileTransversal.travers(this.inputSrcPath);
 		for (String f : phase2Files) {
 			parseFile(f);

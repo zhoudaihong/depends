@@ -20,7 +20,7 @@ public abstract class CppParserTest extends ParserTest{
 	public void init() {
     	repo = new InMemoryEntityRepo();
     	inferer = new Inferer(repo,new CppImportLookupStrategy(),new CppBuiltInType(),false);
-    	preprocessorHandler = new PreprocessorHandler("./src/test/resources/cpp-code-examples/",new ArrayList<>());
+    	preprocessorHandler = new PreprocessorHandler("./src/test/resources/cpp-code-examples/",new ArrayList<>(), new ArrayList<>());
     	TemporaryFile.reset();
 //    	macroRepo = new MacroMemoryRepo();
 //    	macroRepo = new MacroFileRepo(repo);

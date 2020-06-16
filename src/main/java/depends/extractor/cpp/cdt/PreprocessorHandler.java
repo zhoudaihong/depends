@@ -43,10 +43,12 @@ import depends.util.FileUtil;
 public class PreprocessorHandler {
 	private List<String> includePaths;
 	private String inputSrcPath;
+	private List<String> excludePaths;
 	private HashSet<String> allFiles = new HashSet<>();
-	public PreprocessorHandler(String inputSrcPath, List<String> includePaths){
+	public PreprocessorHandler(String inputSrcPath, List<String> includePaths, List<String> excludePaths){
 		this.inputSrcPath = inputSrcPath;
 		this.includePaths = includePaths;
+		this.excludePaths = excludePaths;
 		buildAllFiles();
 	}
 	
@@ -64,10 +66,12 @@ public class PreprocessorHandler {
 		AllFileVisitor v = new AllFileVisitor();
 		if (inputSrcPath!=null) {
 			FileTraversal ft = new FileTraversal(v,false,true);
+			ft.setExcludePaths(excludePaths);
 			ft.travers(inputSrcPath);
 		}
 		for (String includePath:includePaths) {
 			FileTraversal ft = new FileTraversal(v,false,true);
+			ft.setExcludePaths(excludePaths);
 			ft.travers(includePath);
 		}
 	}
