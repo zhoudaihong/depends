@@ -198,6 +198,15 @@ public class JavaListener extends JavaParserBaseListener {
 		}
 		annotationProcessor.processAnnotationModifier(ctx, ClassBodyDeclarationContext.class,"modifier.classOrInterfaceModifier.annotation",context.lastContainer());
 		super.enterMethodDeclaration(ctx);
+		
+		BlockContext block = ctx.methodBody().block();
+		if(block != null) {
+			method.setStartLine(block.start.getLine());
+			method.setStopLine(block.stop.getLine());
+		} else {
+			method.setStartLine(ctx.start.getLine());
+			method.setStopLine(ctx.stop.getLine());
+		}
 	}
 
 	@Override
@@ -225,6 +234,15 @@ public class JavaListener extends JavaParserBaseListener {
 		}
 		annotationProcessor.processAnnotationModifier(ctx, InterfaceBodyDeclarationContext.class,"modifier.classOrInterfaceModifier.annotation",context.lastContainer());
 		super.enterInterfaceMethodDeclaration(ctx);
+		
+		BlockContext block = ctx.methodBody().block();
+		if(block != null) {
+			method.setStartLine(block.start.getLine());
+			method.setStopLine(block.stop.getLine());
+		} else {
+			method.setStartLine(ctx.start.getLine());
+			method.setStopLine(ctx.stop.getLine());
+		}
 	}
 
 	@Override
@@ -242,6 +260,15 @@ public class JavaListener extends JavaParserBaseListener {
 		method.addReturnType(context.currentType());
 		annotationProcessor.processAnnotationModifier(ctx, ClassBodyDeclarationContext.class,"modifier.classOrInterfaceModifier.annotation",context.lastContainer());
 		super.enterConstructorDeclaration(ctx);
+		
+		BlockContext block = ctx.block();
+		if(block != null) {
+			method.setStartLine(block.start.getLine());
+			method.setStopLine(block.stop.getLine());
+		} else {
+			method.setStartLine(ctx.start.getLine());
+			method.setStopLine(ctx.stop.getLine());
+		}
 	}
 
 	@Override

@@ -63,6 +63,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import depends.entity.Entity;
+import depends.entity.FunctionEntity;
 import depends.entity.GenericName;
 import depends.entity.VarEntity;
 import depends.entity.repo.EntityRepo;
@@ -211,7 +212,9 @@ public class CppVisitor  extends ASTVisitor {
 					rawName = namedEntity.get(0).getQualifiedName();
 				}
 				returnType = reMapIfConstructDeconstruct(rawName,returnType);
-				context.foundMethodDeclaratorProto(rawName, returnType);
+				FunctionEntity method = context.foundMethodDeclaratorProto(rawName, returnType);
+				method.setStartLine(decl.getFileLocation().getStartingLineNumber());
+				method.setStopLine(decl.getFileLocation().getEndingLineNumber());
 			}
 			else if ( declarator.getParent() instanceof IASTFunctionDefinition) {
 				IASTFunctionDefinition decl = (IASTFunctionDefinition)declarator.getParent();
@@ -222,7 +225,10 @@ public class CppVisitor  extends ASTVisitor {
 					rawName = namedEntity.get(0).getQualifiedName();
 				}
 				returnType = reMapIfConstructDeconstruct(rawName,returnType);
-				context.foundMethodDeclaratorImplementation(rawName, returnType);
+//				context.foundMethodDeclaratorImplementation(rawName, returnType);
+				FunctionEntity method = context.foundMethodDeclaratorImplementation(rawName, returnType);
+				method.setStartLine(decl.getFileLocation().getStartingLineNumber());
+				method.setStopLine(decl.getFileLocation().getEndingLineNumber());
 			}
 		}
 		return super.visit(declarator);
