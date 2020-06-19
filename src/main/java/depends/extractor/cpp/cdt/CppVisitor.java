@@ -213,8 +213,13 @@ public class CppVisitor  extends ASTVisitor {
 				}
 				returnType = reMapIfConstructDeconstruct(rawName,returnType);
 				FunctionEntity method = context.foundMethodDeclaratorProto(rawName, returnType);
-				method.setStartLine(decl.getFileLocation().getStartingLineNumber());
-				method.setStopLine(decl.getFileLocation().getEndingLineNumber());
+				if(decl.getChildren() != null) {
+					method.setStartLine(decl.getChildren()[decl.getChildren().length - 1].getFileLocation().getStartingLineNumber());
+					method.setStopLine(decl.getChildren()[decl.getChildren().length - 1].getFileLocation().getEndingLineNumber());
+				} else {
+					method.setStartLine(decl.getFileLocation().getStartingLineNumber());
+					method.setStopLine(decl.getFileLocation().getEndingLineNumber());
+				}
 			}
 			else if ( declarator.getParent() instanceof IASTFunctionDefinition) {
 				IASTFunctionDefinition decl = (IASTFunctionDefinition)declarator.getParent();
@@ -227,8 +232,13 @@ public class CppVisitor  extends ASTVisitor {
 				returnType = reMapIfConstructDeconstruct(rawName,returnType);
 //				context.foundMethodDeclaratorImplementation(rawName, returnType);
 				FunctionEntity method = context.foundMethodDeclaratorImplementation(rawName, returnType);
-				method.setStartLine(decl.getFileLocation().getStartingLineNumber());
-				method.setStopLine(decl.getFileLocation().getEndingLineNumber());
+				if(decl.getChildren() != null) {
+					method.setStartLine(decl.getChildren()[decl.getChildren().length - 1].getFileLocation().getStartingLineNumber());
+					method.setStopLine(decl.getChildren()[decl.getChildren().length - 1].getFileLocation().getEndingLineNumber());
+				} else {
+					method.setStartLine(decl.getFileLocation().getStartingLineNumber());
+					method.setStopLine(decl.getFileLocation().getEndingLineNumber());
+				}
 			}
 		}
 		return super.visit(declarator);
