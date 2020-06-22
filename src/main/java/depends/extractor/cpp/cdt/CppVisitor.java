@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import depends.entity.*;
 import org.codehaus.plexus.util.StringUtils;
 import org.eclipse.cdt.core.dom.ast.ASTVisitor;
 import org.eclipse.cdt.core.dom.ast.IASTCompositeTypeSpecifier;
@@ -62,10 +63,6 @@ import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTVisibilityLabel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import depends.entity.Entity;
-import depends.entity.FunctionEntity;
-import depends.entity.GenericName;
-import depends.entity.VarEntity;
 import depends.entity.repo.EntityRepo;
 import depends.entity.repo.IdGenerator;
 import depends.extractor.cpp.CppHandlerContext;
@@ -156,16 +153,17 @@ public class CppVisitor  extends ASTVisitor {
 		return super.leave(namespaceDefinition);
 	}
 
-	// Types
+	// Types (struct/class/enum)
 	@Override
 	public int visit(IASTDeclSpecifier declSpec) {
 		if (notLocalFile(declSpec)) return ASTVisitor.PROCESS_SKIP;
 		logger.trace("enter IASTDeclSpecifier  " + declSpec.getClass().getSimpleName());
+		TypeEntity typeEntity = null;
 		if (declSpec instanceof IASTCompositeTypeSpecifier) {
 			IASTCompositeTypeSpecifier type = (IASTCompositeTypeSpecifier)declSpec;
 			String name = ASTStringUtilExt.getName(type);
 			List<GenericName> param = ASTStringUtilExt.getTemplateParameters(type);
-			context.foundNewType(name);
+			typeEntity = context.foundNewType(name);
 			if (declSpec instanceof ICPPASTCompositeTypeSpecifier) {
 				ICPPASTBaseSpecifier[] baseSpecififers = ((ICPPASTCompositeTypeSpecifier)declSpec).getBaseSpecifiers();
 				for (ICPPASTBaseSpecifier baseSpecififer:baseSpecififers) {
@@ -175,9 +173,13 @@ public class CppVisitor  extends ASTVisitor {
 			}
 		}
 		else if (declSpec instanceof  IASTEnumerationSpecifier) {
-			context.foundNewType(ASTStringUtilExt.getName(declSpec));
+			typeEntity = context.foundNewType(ASTStringUtilExt.getName(declSpec));
 		}else {
 			//we do not care other types
+		}
+		if (typeEntity != null) {
+			typeEntity.setStartLine(declSpec.getFileLocation().getStartingLineNumber());
+			typeEntity.setStopLine(declSpec.getFileLocation().getEndingLineNumber());
 		}
 		return super.visit(declSpec);
 	}
@@ -232,6 +234,7 @@ public class CppVisitor  extends ASTVisitor {
 				returnType = reMapIfConstructDeconstruct(rawName,returnType);
 //				context.foundMethodDeclaratorImplementation(rawName, returnType);
 				FunctionEntity method = context.foundMethodDeclaratorImplementation(rawName, returnType);
+				IASTNode[] children = decl.getChildren();
 				if(decl.getChildren() != null) {
 					method.setStartLine(decl.getChildren()[decl.getChildren().length - 1].getFileLocation().getStartingLineNumber());
 					method.setStopLine(decl.getChildren()[decl.getChildren().length - 1].getFileLocation().getEndingLineNumber());

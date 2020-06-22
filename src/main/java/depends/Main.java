@@ -25,6 +25,7 @@ SOFTWARE.
 package depends;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -156,7 +157,7 @@ public class Main {
 		dependencyGenerator.setFilenameRewritter(filenameWritter);
 		langProcessor.setDependencyGenerator(dependencyGenerator);
 		
-		langProcessor.buildDependencies(inputDir, includeDir,app.getTypeFilter(),supportImplLink,app.isOutputExternalDependencies(),app.isDuckTypingDeduce(), null);
+		langProcessor.buildDependencies(inputDir, includeDir,app.getTypeFilter(),supportImplLink,app.isOutputExternalDependencies(),app.isDuckTypingDeduce(), new ArrayList<>());
 		
 		
 //		DependencyMatrix matrix = langProcessor.getDependencies();

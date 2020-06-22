@@ -29,6 +29,7 @@ import java.util.List;
 
 import depends.entity.FunctionEntity;
 import depends.entity.GenericName;
+import depends.entity.TypeEntity;
 import depends.entity.VarEntity;
 import depends.entity.repo.EntityRepo;
 import depends.extractor.java.JavaParser.AnnotationConstantRestContext;
@@ -103,7 +104,7 @@ public class JavaListener extends JavaParserBaseListener {
 	@Override
 	public void enterClassDeclaration(ClassDeclarationContext ctx) {
 		if (ctx.IDENTIFIER()==null) return;
-		context.foundNewType(GenericName.build(ctx.IDENTIFIER().getText()));
+		TypeEntity type = context.foundNewType(GenericName.build(ctx.IDENTIFIER().getText()));
 		// implements
 		if (ctx.typeList() != null) {
 			for (int i = 0; i < ctx.typeList().typeType().size(); i++) {
@@ -119,6 +120,8 @@ public class JavaListener extends JavaParserBaseListener {
 			foundTypeParametersUse(ctx.typeParameters());
 		}
 		annotationProcessor.processAnnotationModifier(ctx, TypeDeclarationContext.class ,"classOrInterfaceModifier.annotation",context.lastContainer());
+		type.setStartLine(ctx.classBody().LBRACE().getSymbol().getLine());
+		type.setStopLine(ctx.classBody().RBRACE().getSymbol().getLine());
 		super.enterClassDeclaration(ctx);
 	}
 
@@ -130,15 +133,19 @@ public class JavaListener extends JavaParserBaseListener {
 
 	@Override
 	public void enterEnumDeclaration(EnumDeclarationContext ctx) {
-		context.foundNewType(GenericName.build(ctx.IDENTIFIER().getText()));
+		TypeEntity type = context.foundNewType(GenericName.build(ctx.IDENTIFIER().getText()));
 		annotationProcessor.processAnnotationModifier(ctx, TypeDeclarationContext.class ,"classOrInterfaceModifier.annotation",context.lastContainer());
+		type.setStartLine(ctx.LBRACE().getSymbol().getLine());
+		type.setStopLine(ctx.RBRACE().getSymbol().getLine());
 		super.enterEnumDeclaration(ctx);
 	}
 
 	@Override
 	public void enterAnnotationTypeDeclaration(AnnotationTypeDeclarationContext ctx) {
-		context.foundNewType(GenericName.build(ctx.IDENTIFIER().getText()));
+		TypeEntity type = context.foundNewType(GenericName.build(ctx.IDENTIFIER().getText()));
 		annotationProcessor.processAnnotationModifier(ctx, TypeDeclarationContext.class ,"classOrInterfaceModifier.annotation",context.lastContainer());
+		type.setStartLine(ctx.annotationTypeBody().LBRACE().getSymbol().getLine());
+		type.setStopLine(ctx.annotationTypeBody().RBRACE().getSymbol().getLine());
 		super.enterAnnotationTypeDeclaration(ctx);
 	}
 	
@@ -154,7 +161,7 @@ public class JavaListener extends JavaParserBaseListener {
 	 */
 	@Override
 	public void enterInterfaceDeclaration(InterfaceDeclarationContext ctx) {
-		context.foundNewType(GenericName.build(ctx.IDENTIFIER().getText()));
+		TypeEntity type = context.foundNewType(GenericName.build(ctx.IDENTIFIER().getText()));
 		// type parameters
 		if (ctx.typeParameters() != null) {
 			foundTypeParametersUse(ctx.typeParameters());
@@ -166,6 +173,8 @@ public class JavaListener extends JavaParserBaseListener {
 			}
 		}
 		annotationProcessor.processAnnotationModifier(ctx, TypeDeclarationContext.class ,"classOrInterfaceModifier.annotation",context.lastContainer());
+		type.setStartLine(ctx.interfaceBody().LBRACE().getSymbol().getLine());
+		type.setStopLine(ctx.interfaceBody().RBRACE().getSymbol().getLine());
 		super.enterInterfaceDeclaration(ctx);
 	}
 
