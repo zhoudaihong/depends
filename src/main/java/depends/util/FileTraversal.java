@@ -115,7 +115,7 @@ public class FileTraversal {
 		if (excludePaths.size() == 0) return false;
 		for (String exc : excludePaths) {
 			try {
-				if (file.getCanonicalPath().equals(FileUtil.uniqFilePath(exc))) {
+				if (file.getCanonicalPath().startsWith(FileUtil.uniqFilePath(exc))) {
 					return true;
 				}
 			}catch (IOException e) {
