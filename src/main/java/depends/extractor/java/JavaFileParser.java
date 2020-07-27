@@ -65,12 +65,13 @@ public class JavaFileParser implements depends.extractor.FileParser{
         JavaListener bridge = new JavaListener(fileFullPath, entityRepo,inferer);
 	    ParseTreeWalker walker = new ParseTreeWalker();
 	    try {
-	    	walker.walk(bridge, parser.compilationUnit());
+			JavaParser.CompilationUnitContext ctx = parser.compilationUnit();
+			walker.walk(bridge, ctx);
 			Entity fileEntity = entityRepo.getEntity(fileFullPath);
+			((FileEntity)fileEntity).setStopLine(ctx.stop.getLine());
 			((FileEntity)fileEntity).cacheAllExpressions();
 			interpreter.clearDFA();
 			bridge.done();
-	    	
 	    }catch (Exception e) {
 	    	System.err.println("error encountered during parse..." );
 	    	e.printStackTrace();
