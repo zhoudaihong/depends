@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 
 import depends.entity.repo.EntityRepo;
 import depends.relations.Inferer;
-import depends.util.TemporaryFile;
+import multilang.depends.util.file.TemporaryFile;
 
 /**
  * ContainerEntity for example file, class, method, etc. they could contain
@@ -179,6 +179,8 @@ public abstract class ContainerEntity extends DecoratedEntity {
 		
 		if (expressionList==null) return;
 		if(expressionList.size()>10000) return;
+		
+		
 		for (Expression expression : expressionList) {
 			// 1. if expression's type existed, break;
 			if (expression.getType() != null)
@@ -198,6 +200,13 @@ public abstract class ContainerEntity extends DecoratedEntity {
 				}
 			}
 			if (expression.getIdentifier() != null) {
+
+//				if (this.getAncestorOfType(FileEntity.class).getRawName().contains("/examples/usersession/server.py") &&
+//						expression.getIdentifier().contains("config")) {
+//					System.out.print("dd");
+//				}
+				
+				
 				Entity entity = inferer.resolveName(this, expression.getIdentifier(), true);
 				String composedName = expression.getIdentifier().toString();
 				Expression theExpr = expression;

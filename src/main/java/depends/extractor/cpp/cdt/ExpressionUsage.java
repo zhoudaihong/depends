@@ -23,16 +23,7 @@ SOFTWARE.
 */
 
 package depends.extractor.cpp.cdt;
-import org.eclipse.cdt.core.dom.ast.IASTBinaryExpression;
-import org.eclipse.cdt.core.dom.ast.IASTCastExpression;
-import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
-import org.eclipse.cdt.core.dom.ast.IASTExpression;
-import org.eclipse.cdt.core.dom.ast.IASTFunctionCallExpression;
-import org.eclipse.cdt.core.dom.ast.IASTIdExpression;
-import org.eclipse.cdt.core.dom.ast.IASTLiteralExpression;
-import org.eclipse.cdt.core.dom.ast.IASTNode;
-import org.eclipse.cdt.core.dom.ast.IASTTypeIdExpression;
-import org.eclipse.cdt.core.dom.ast.IASTUnaryExpression;
+import org.eclipse.cdt.core.dom.ast.*;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNewExpression;
 
 import depends.entity.Expression;
@@ -58,31 +49,28 @@ public class ExpressionUsage {
 	
 	public void foundExpression(IASTExpression ctx) {
 		Expression parent = findParentInStack(ctx);
-		//If parent already a call 
-		if (parent!=null ) {
-			if (ctx instanceof IASTIdExpression && (parent.isCall() || parent.isCast())) {
-				return;
-			}
+		Expression expression = null;
+		if (parent!=null && ctx.getParent()!=null && (ctx.getParent().getChildren().length==1)){
+			expression = parent;
+		}else {
+			/* create expression and link it with parent*/
+			expression = new Expression(idGenerator.generateId());
+			expression.setText(ctx.getRawSignature());
+			context.lastContainer().addExpression(ctx, expression);
+			expression.setParent(parent);
 		}
-		/* create expression and link it with parent*/
-		Expression expression = new Expression(idGenerator.generateId());
-		expression.setText( ctx.getRawSignature());
-		context.lastContainer().addExpression(ctx,expression);
-		expression.setParent(parent);
-	
-		
+
 		if (isTerminalExpression(ctx)) {
 			tryFillExpressionTypeAndIdentifier(ctx,expression);
 			return;
 		}
-		
-		expression.setSet(isSet(ctx));
-		expression.setCall((ctx instanceof IASTFunctionCallExpression)?true:false);
-		expression.setLogic(isLogic(ctx));
+		expression.setSet(expression.isSet() || isSet(ctx));
+		expression.setCall(expression.isCall() || (ctx instanceof IASTFunctionCallExpression));
+		expression.setLogic(expression.isLogic() || isLogic(ctx));
 		if (ctx instanceof ICPPASTNewExpression){
-			expression.setCreate(true);;
-		}		
-		expression.setDot(isDot(ctx));
+			expression.setCreate(true);
+		}
+		expression.setDot(expression.isDot() || isDot(ctx));
 
 		/**
  *    | expression bop='.'
@@ -109,14 +97,15 @@ public class ExpressionUsage {
 
 		}
 		if (expression.isDot()) {
-			IASTExpression op2 = ((IASTBinaryExpression)ctx).getOperand2();
-			if (op2 instanceof IASTIdExpression)
-				expression.setIdentifier(ASTStringUtilExt.getName(((IASTIdExpression)op2).getName()));
-			else if (op2 instanceof IASTLiteralExpression)
-				expression.setIdentifier(ASTStringUtilExt.getName((IASTLiteralExpression)op2));
-			else if (op2 instanceof IASTFunctionCallExpression)
-				expression.setIdentifier(getMethodCallIdentifier((IASTFunctionCallExpression)op2));
-			return;
+			if (ctx instanceof  IASTBinaryExpression) {
+				IASTExpression op2 = ((IASTBinaryExpression) ctx).getOperand2();
+				if (op2 instanceof IASTIdExpression)
+					expression.setIdentifier(ASTStringUtilExt.getName(((IASTIdExpression) op2).getName()));
+				else if (op2 instanceof IASTLiteralExpression)
+					expression.setIdentifier(ASTStringUtilExt.getName((IASTLiteralExpression) op2));
+				else if (op2 instanceof IASTFunctionCallExpression)
+					expression.setIdentifier(getMethodCallIdentifier((IASTFunctionCallExpression) op2));
+			}
 		}		
 	}
 
@@ -149,6 +138,10 @@ public class ExpressionUsage {
 		if (f instanceof IASTIdExpression) {
 			return GenericName.build(ASTStringUtilExt.getName(((IASTIdExpression)f).getName()));
 		}
+		if (f instanceof  IASTFieldReference){
+			IASTFieldReference func = (IASTFieldReference) f;
+			return GenericName.build(ASTStringUtilExt.getName(func.getFieldName()));
+		}
 		return null;
 	}
 
@@ -157,6 +150,12 @@ public class ExpressionUsage {
 			int op = ((IASTBinaryExpression)ctx).getOperator();
 			if (op==IASTBinaryExpression.op_pmdot ||
 					op==IASTBinaryExpression.op_pmarrow	) return true;
+		}
+		if (ctx instanceof  IASTFunctionCallExpression){
+			if (ctx.getChildren().length>0){
+				if (ctx.getChildren()[0] instanceof IASTFieldReference)
+					return true;
+			}
 		}
 		return false;
 	}

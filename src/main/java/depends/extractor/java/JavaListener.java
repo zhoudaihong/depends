@@ -120,8 +120,12 @@ public class JavaListener extends JavaParserBaseListener {
 			foundTypeParametersUse(ctx.typeParameters());
 		}
 		annotationProcessor.processAnnotationModifier(ctx, TypeDeclarationContext.class ,"classOrInterfaceModifier.annotation",context.lastContainer());
-		type.setStartLine(ctx.classBody().LBRACE().getSymbol().getLine());
-		type.setStopLine(ctx.classBody().RBRACE().getSymbol().getLine());
+		if (ctx.classBody().LBRACE() != null) {
+			type.setStartLine(ctx.classBody().LBRACE().getSymbol().getLine());
+		}
+		if (ctx.classBody().RBRACE() != null) {
+			type.setStopLine(ctx.classBody().RBRACE().getSymbol().getLine());
+		}
 		super.enterClassDeclaration(ctx);
 	}
 
@@ -135,8 +139,12 @@ public class JavaListener extends JavaParserBaseListener {
 	public void enterEnumDeclaration(EnumDeclarationContext ctx) {
 		TypeEntity type = context.foundNewType(GenericName.build(ctx.IDENTIFIER().getText()));
 		annotationProcessor.processAnnotationModifier(ctx, TypeDeclarationContext.class ,"classOrInterfaceModifier.annotation",context.lastContainer());
-		type.setStartLine(ctx.LBRACE().getSymbol().getLine());
-		type.setStopLine(ctx.RBRACE().getSymbol().getLine());
+		if (ctx.LBRACE() != null) {
+			type.setStartLine(ctx.LBRACE().getSymbol().getLine());
+		}
+		if (ctx.RBRACE() != null) {
+			type.setStopLine(ctx.RBRACE().getSymbol().getLine());
+		}
 		super.enterEnumDeclaration(ctx);
 	}
 
@@ -144,8 +152,12 @@ public class JavaListener extends JavaParserBaseListener {
 	public void enterAnnotationTypeDeclaration(AnnotationTypeDeclarationContext ctx) {
 		TypeEntity type = context.foundNewType(GenericName.build(ctx.IDENTIFIER().getText()));
 		annotationProcessor.processAnnotationModifier(ctx, TypeDeclarationContext.class ,"classOrInterfaceModifier.annotation",context.lastContainer());
-		type.setStartLine(ctx.annotationTypeBody().LBRACE().getSymbol().getLine());
-		type.setStopLine(ctx.annotationTypeBody().RBRACE().getSymbol().getLine());
+		if (ctx.annotationTypeBody().LBRACE() != null) {
+			type.setStartLine(ctx.annotationTypeBody().LBRACE().getSymbol().getLine());
+		}
+		if (ctx.annotationTypeBody().RBRACE() != null) {
+			type.setStopLine(ctx.annotationTypeBody().RBRACE().getSymbol().getLine());
+		}
 		super.enterAnnotationTypeDeclaration(ctx);
 	}
 	
@@ -173,8 +185,12 @@ public class JavaListener extends JavaParserBaseListener {
 			}
 		}
 		annotationProcessor.processAnnotationModifier(ctx, TypeDeclarationContext.class ,"classOrInterfaceModifier.annotation",context.lastContainer());
-		type.setStartLine(ctx.interfaceBody().LBRACE().getSymbol().getLine());
-		type.setStopLine(ctx.interfaceBody().RBRACE().getSymbol().getLine());
+		if (ctx.interfaceBody().LBRACE() != null) {
+			type.setStartLine(ctx.interfaceBody().LBRACE().getSymbol().getLine());
+		}
+		if (ctx.interfaceBody().RBRACE() != null) {
+			type.setStopLine(ctx.interfaceBody().RBRACE().getSymbol().getLine());
+		}
 		super.enterInterfaceDeclaration(ctx);
 	}
 

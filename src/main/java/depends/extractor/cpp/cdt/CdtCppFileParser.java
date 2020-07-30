@@ -36,7 +36,7 @@ import depends.entity.repo.EntityRepo;
 import depends.extractor.cpp.CppFileParser;
 import depends.extractor.cpp.MacroRepo;
 import depends.relations.Inferer;
-import depends.util.FileUtil;
+import multilang.depends.util.file.FileUtil;
 
 public class CdtCppFileParser extends CppFileParser {
 
@@ -74,8 +74,6 @@ public class CdtCppFileParser extends CppFileParser {
 		
 		CppVisitor bridge = new CppVisitor(fileFullPath, entityRepo, preprocessorHandler,inferer);
 		IASTTranslationUnit tu = (new CDTParser(preprocessorHandler.getIncludePaths())).parse(fileFullPath,macroMap);
-		int loc1 = tu.getFileLocation().getStartingLineNumber();
-		int loc2 = tu.getFileLocation().getEndingLineNumber();
 		boolean containsIncludes = false;
 		for (String incl:preprocessorHandler.getDirectIncludedFiles(tu.getAllPreprocessorStatements(),fileFullPath)) {
 			CdtCppFileParser importedParser = new CdtCppFileParser(incl, entityRepo, preprocessorHandler,inferer,macroRepo);
@@ -91,7 +89,6 @@ public class CdtCppFileParser extends CppFileParser {
 		macroRepo.putMacros(this.fileFullPath,macroMap,tu.getMacroDefinitions());
 		tu.accept(bridge);
 		fileEntity = entityRepo.getEntity(fileFullPath);
-		((FileEntity)fileEntity).setStartLine(tu.getFileLocation().getStartingLineNumber());
 		((FileEntity)fileEntity).setStopLine(tu.getFileLocation().getEndingLineNumber() + 1);
 		((FileEntity)fileEntity).cacheAllExpressions();
 		bridge.done();

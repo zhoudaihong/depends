@@ -128,7 +128,7 @@ public class ExpressionUsage {
 	private boolean isValidIdentifier(GenericName identifier) {
 		Pattern p = Pattern.compile("[a-zA-Z_][a-zA-Z0-9_]*");
 		Matcher m = p.matcher(identifier.getName());
-		return m.find();
+		return m.matches();
 	}
 
 

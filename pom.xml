@@ -82,6 +82,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>cn.emergentdesign.se</groupId>
+            <artifactId>utils</artifactId>
+            <version>0.0.1</version>
+        </dependency>
+        <dependency>
             <groupId>eclipse-photon</groupId>
             <artifactId>org.eclipse.core.resources</artifactId>
             <version>3.13.700.v20200209-1624</version>

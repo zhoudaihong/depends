@@ -37,20 +37,20 @@ import depends.extractor.LangProcessorRegistration;
 import depends.extractor.UnsolvedBindings;
 import depends.format.DependencyDumper;
 import depends.format.detail.UnsolvedSymbolDumper;
-import depends.format.path.DotPathFilenameWritter;
-import depends.format.path.EmptyFilenameWritter;
-import depends.format.path.FilenameWritter;
-import depends.format.path.UnixPathFilenameWritter;
-import depends.format.path.WindowsPathFilenameWritter;
+import multilang.depends.util.file.path.DotPathFilenameWritter;
+import multilang.depends.util.file.path.EmptyFilenameWritter;
+import multilang.depends.util.file.path.FilenameWritter;
+import multilang.depends.util.file.path.UnixPathFilenameWritter;
+import multilang.depends.util.file.path.WindowsPathFilenameWritter;
 import depends.generator.DependencyGenerator;
 import depends.generator.FileDependencyGenerator;
 import depends.generator.FunctionDependencyGenerator;
 import depends.matrix.core.DependencyMatrix;
 import depends.matrix.transform.MatrixLevelReducer;
-import depends.matrix.transform.strip.LeadingNameStripper;
-import depends.util.FileUtil;
-import depends.util.FolderCollector;
-import depends.util.TemporaryFile;
+import multilang.depends.util.file.strip.LeadingNameStripper;
+import multilang.depends.util.file.FileUtil;
+import multilang.depends.util.file.FolderCollector;
+import multilang.depends.util.file.TemporaryFile;
 import edu.emory.mathcs.backport.java.util.Arrays;
 import net.sf.ehcache.CacheManager;
 import picocli.CommandLine;
@@ -60,6 +60,21 @@ public class Main {
 
 	public static void main(String[] args) {
 		try {
+			List<String> commands = new ArrayList<>();
+			commands.add("-d");
+			commands.add("C:\\Users\\SongJee\\Desktop\\result");  // 分析结果要存的目录
+			commands.add("-f");
+			commands.add("plantuml");
+//          commands.add("-i");
+//          commands.add("D:\\software\\cloc\\cJSON-1.7.12");
+			commands.add("java");
+//          commands.add("D:\\my_data\\c_demo\\tabix"); // 要分析的项目路径
+//          commands.add("C:\\Users\\SongJee\\Desktop\\test");
+			commands.add("D:\\my_data\\SDTeam\\depends_\\edited-to-jar\\fork\\depends");
+			commands.add("test_depends_data");  // 分析结果的文件名
+			commands.add("--auto-include");
+			args = new String[commands.size()];
+			commands.toArray(args);
 			LangRegister langRegister = new LangRegister();
 			langRegister.register();
 			DependsCommand app = CommandLine.populateCommand(new DependsCommand(), args);
@@ -93,14 +108,14 @@ public class Main {
 		inputDir = FileUtil.uniqFilePath(inputDir);
 		boolean supportImplLink = false;
 		if (app.getLang().equals("cpp") || app.getLang().equals("python")) supportImplLink = true;
-		
+
 		if (app.isAutoInclude()) {
 			FolderCollector includePathCollector = new FolderCollector();
 			List<String> additionalIncludePaths = includePathCollector.getFolders(inputDir);
 			additionalIncludePaths.addAll(Arrays.asList(includeDir));
 			includeDir = additionalIncludePaths.toArray(new String[] {});
 		}
-			
+
 		AbstractLangProcessor langProcessor = LangProcessorRegistration.getRegistry().getProcessorOf(lang);
 		if (langProcessor == null) {
 			System.err.println("Not support this language: " + lang);
@@ -111,9 +126,9 @@ public class Main {
 			DV8MappingFileBuilder dv8MapfileBuilder = new DV8MappingFileBuilder(langProcessor.supportedRelations());
 			dv8MapfileBuilder.create(outputDir+File.separator+"depends-dv8map.mapping");
 		}
-		
+
 		long startTime = System.currentTimeMillis();
-		
+
 		FilenameWritter filenameWritter = new EmptyFilenameWritter();
 		if (!StringUtils.isEmpty(app.getNamePathPattern())) {
 			if (app.getNamePathPattern().equals("dot")||
@@ -130,7 +145,7 @@ public class Main {
 			}
 		}
 
-		
+
 		/* by default use file dependency generator */
 		DependencyGenerator dependencyGenerator = new FileDependencyGenerator();
 		if (!StringUtils.isEmpty(app.getGranularity())) {
@@ -144,22 +159,22 @@ public class Main {
 			else
 				throw new ParameterException("Unknown granularity parameter:" + app.getGranularity());
 		}
-		
+
 		if (app.isStripLeadingPath() ||
 				app.getStrippedPaths().length>0) {
 			dependencyGenerator.setLeadingStripper(new LeadingNameStripper(app.isStripLeadingPath(),inputDir,app.getStrippedPaths()));
 		}
-		
+
 		if (app.isDetail()) {
 			dependencyGenerator.setGenerateDetail(true);
 		}
-		
+
 		dependencyGenerator.setFilenameRewritter(filenameWritter);
 		langProcessor.setDependencyGenerator(dependencyGenerator);
-		
+
 		langProcessor.buildDependencies(inputDir, includeDir,app.getTypeFilter(),supportImplLink,app.isOutputExternalDependencies(),app.isDuckTypingDeduce(), new ArrayList<>());
-		
-		
+
+
 //		DependencyMatrix matrix = langProcessor.getDependencies();
 //
 //		if (app.getGranularity().startsWith("L")) {

@@ -170,20 +170,4 @@ public class FileEntity extends TypeEntity {
 		}
 	}
 
-
-
-	private int startLine = -1;
-	private int stopLine = -1;
-	public void setStartLine(int startLine) {
-		this.startLine = startLine;
-	}
-	public void setStopLine(int endLine) {
-		this.stopLine = endLine;
-	}
-	public int getStartLine() {
-		return startLine;
-	}
-	public int getStopLine() {
-		return stopLine;
-	}
 }

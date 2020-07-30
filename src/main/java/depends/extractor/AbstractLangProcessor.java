@@ -43,8 +43,9 @@ import depends.matrix.core.DependencyMatrix;
 import depends.matrix.transform.OrderedMatrixGenerator;
 import depends.relations.ImportLookupStrategy;
 import depends.relations.Inferer;
-import depends.util.FileTraversal;
-import depends.util.FileUtil;
+import multilang.depends.util.file.FileTraversal;
+import multilang.depends.util.file.FileUtil;
+
 
 abstract public class AbstractLangProcessor {
 	/**
@@ -119,7 +120,6 @@ abstract public class AbstractLangProcessor {
 		this.inferer.setDuckTypingDeduce(isDuckTypingDeduce);
 		logger.info("Start parsing files...");
 		parseAllFiles();
-		logger.info("all files procceed successfully...");
 		markAllEntitiesScope();
 		if (logger.isInfoEnabled()) {
 			logger.info("Resolve types and bindings of variables, methods and expressions.... " + this.inputSrcPath);
@@ -131,7 +131,7 @@ abstract public class AbstractLangProcessor {
 			logger.info("Heap Information: " + ManagementFactory.getMemoryMXBean().getHeapMemoryUsage());
 		}
 //		identifyDependencies();
-//		logger.info("Dependencie data generating done successfully...");
+		logger.info("Dependencie data generating done successfully...");
 	}
 
 	private void markAllEntitiesScope() {
@@ -153,6 +153,7 @@ abstract public class AbstractLangProcessor {
 	 * @return unsolved bindings
 	 */
 	public void resolveBindings(boolean callAsImpl) {
+	    logger.info("Resolve types and bindings of variables, methods and expressions....");
 //		System.out.println("Resolve types and bindings of variables, methods and expressions....");
 		this.potentialExternalDependencies = inferer.resolveAllBindings(callAsImpl,this);
 		if (getExternalDependencies().size() > 0) {
