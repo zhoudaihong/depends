@@ -67,7 +67,6 @@ public class CDTParser {
 		
 		IScanner scanner = Scanner.buildScanner(file,macroMap,sysIncludePath,false);
 		if (scanner==null) return null;
-
 		AbstractGNUSourceCodeParser sourceCodeParser = new GNUCPPSourceParser(
 				scanner, ParserMode.COMPLETE_PARSE,  new NullLogService(),
 				new GPPParserExtensionConfigurationExtension(), null);

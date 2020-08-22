@@ -69,8 +69,8 @@ public class Main {
 //          commands.add("D:\\software\\cloc\\cJSON-1.7.12");
 			commands.add("java");
 //          commands.add("D:\\my_data\\c_demo\\tabix"); // 要分析的项目路径
-//          commands.add("C:\\Users\\SongJee\\Desktop\\test");
-			commands.add("D:\\my_data\\SDTeam\\depends_\\edited-to-jar\\fork\\depends");
+            commands.add("D:\\my_data\\SDTeam\\multi-dependency");
+//			commands.add("D:\\my_data\\cpp_project\\leveldb-1.22-maked");
 			commands.add("test_depends_data");  // 分析结果的文件名
 			commands.add("--auto-include");
 			args = new String[commands.size()];

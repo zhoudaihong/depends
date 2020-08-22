@@ -26,10 +26,8 @@ package depends.extractor.java;
 
 import java.io.IOException;
 
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Lexer;
+import depends.extractor.LocCalculator;
+import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.LexerATNSimulator;
 import org.antlr.v4.runtime.atn.ParserATNSimulator;
 import org.antlr.v4.runtime.atn.PredictionContextCache;
@@ -68,8 +66,9 @@ public class JavaFileParser implements depends.extractor.FileParser{
 			JavaParser.CompilationUnitContext ctx = parser.compilationUnit();
 			walker.walk(bridge, ctx);
 			Entity fileEntity = entityRepo.getEntity(fileFullPath);
-			((FileEntity)fileEntity).setStopLine(ctx.stop.getLine());
 			((FileEntity)fileEntity).cacheAllExpressions();
+			((FileEntity)fileEntity).setStopLine(ctx.stop.getLine());
+			((FileEntity)fileEntity).setLoc(LocCalculator.calcLoc(input.toString()));
 			interpreter.clearDFA();
 			bridge.done();
 	    }catch (Exception e) {
@@ -78,5 +77,4 @@ public class JavaFileParser implements depends.extractor.FileParser{
 	    }
 	    
     }
-	
 }

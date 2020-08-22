@@ -25,9 +25,12 @@ SOFTWARE.
 package depends.extractor.cpp.cdt;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import depends.extractor.LocCalculator;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 
 import depends.entity.Entity;
@@ -89,10 +92,17 @@ public class CdtCppFileParser extends CppFileParser {
 		macroRepo.putMacros(this.fileFullPath,macroMap,tu.getMacroDefinitions());
 		tu.accept(bridge);
 		fileEntity = entityRepo.getEntity(fileFullPath);
-		((FileEntity)fileEntity).setStopLine(tu.getFileLocation().getEndingLineNumber() + 1);
 		((FileEntity)fileEntity).cacheAllExpressions();
+		((FileEntity)fileEntity).setStopLine(tu.getFileLocation().getEndingLineNumber() + 1);
+		try {
+			Method method = tu.getFileLocation().getClass().getMethod("getSource");
+			method.setAccessible(true);
+			char[] charArray = (char[]) method.invoke(tu.getFileLocation());
+			((FileEntity)fileEntity).setLoc(LocCalculator.calcLoc(new String(charArray)));
+		} catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
 		bridge.done();
-		return;
 	}
 	
 }
