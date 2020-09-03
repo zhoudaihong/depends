@@ -24,26 +24,14 @@ SOFTWARE.
 
 package depends.relations;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import depends.deptypes.DependencyType;
-import depends.entity.AliasEntity;
-import depends.entity.ContainerEntity;
-import depends.entity.Entity;
-import depends.entity.Expression;
-import depends.entity.FileEntity;
-import depends.entity.FunctionEntity;
-import depends.entity.FunctionEntityImpl;
-import depends.entity.FunctionEntityProto;
-import depends.entity.MultiDeclareEntities;
-import depends.entity.TypeEntity;
-import depends.entity.VarEntity;
+import depends.entity.*;
 import depends.entity.repo.EntityRepo;
 import depends.extractor.AbstractLangProcessor;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class RelationCounter {
 
@@ -89,9 +77,9 @@ public class RelationCounter {
 	private void computeContainerRelations(ContainerEntity entity) {
 		for (VarEntity var:entity.getVars()) {
 			if (var.getType()!=null)
-				entity.addRelation(buildRelation(entity,DependencyType.CONTAIN,var.getType()));
+				entity.addRelation(buildRelation(entity,DependencyType.CONTAIN,var.getType(),var.getLocation()));
 			for (Entity type:var.getResolvedTypeParameters()) {
-				var.addRelation(buildRelation(var, DependencyType.PARAMETER,type));
+				var.addRelation(buildRelation(var, DependencyType.PARAMETER,type,type.getLocation()));
 			}
 		}
 		for (Entity type:entity.getResolvedAnnotations()) {
@@ -124,7 +112,9 @@ public class RelationCounter {
 		if (referredEntity==null) {
 			return;
 		}
-
+		if (referredEntity.getId()<0){
+			return;
+		}
 		if (referredEntity instanceof MultiDeclareEntities) {
 			for (Entity e:((MultiDeclareEntities)referredEntity).getEntities()) {
 				addRelationFromExpression(entity,expression,e);
@@ -136,53 +126,65 @@ public class RelationCounter {
 		if (expression.isCall()) {
 			/* if it is a FunctionEntityProto, add Relation to all Impl Entities*/
 			if (callAsImpl && referredEntity instanceof FunctionEntityProto) {
-				Entity multiDeclare = repo.getEntity(referredEntity.getQualifiedName());
-				if (multiDeclare instanceof MultiDeclareEntities) {
-					MultiDeclareEntities m = (MultiDeclareEntities)multiDeclare;
-					List<Entity> entities = m.getEntities().stream().filter(item->(item instanceof FunctionEntityImpl))
-					.collect(Collectors.toList());
-					for (Entity e:entities) {
-						entity.addRelation(buildRelation(entity,DependencyType.IMPLLINK,e));
-						matched = true;
+				if (entity.getAncestorOfType(FileEntity.class).getId().equals(referredEntity.getAncestorOfType(FileEntity.class).getId())){
+					entity.addRelation(buildRelation(entity,DependencyType.CALL,referredEntity,expression.getLocation()));
+				}else {
+					Entity multiDeclare = repo.getEntity(referredEntity.getQualifiedName());
+					if (multiDeclare instanceof MultiDeclareEntities) {
+						MultiDeclareEntities m = (MultiDeclareEntities)multiDeclare;
+						List<Entity> entities = m.getEntities().stream().filter(item->(item instanceof FunctionEntityImpl))
+								.collect(Collectors.toList());
+						for (Entity e:entities) {
+							entity.addRelation(expression,buildRelation(entity,DependencyType.IMPLLINK,e,expression.getLocation()));
+							matched = true;
+						}
 					}
 				}
 			}
-			entity.addRelation(buildRelation(entity,DependencyType.CALL,referredEntity));
+			entity.addRelation(buildRelation(entity,DependencyType.CALL,referredEntity,expression.getLocation()));
 			matched = true;
 
 		}
 		if (expression.isCreate()) {
-			entity.addRelation(buildRelation(entity,DependencyType.CREATE,referredEntity));
+			entity.addRelation(buildRelation(entity,DependencyType.CREATE,referredEntity,expression.getLocation()));
 			matched = true;
 		}
 		if (expression.isThrow()) {
-			entity.addRelation(buildRelation(entity,DependencyType.THROW,referredEntity));
+			entity.addRelation(buildRelation(entity,DependencyType.THROW,referredEntity,expression.getLocation()));
 			matched = true;
 		}
 		if (expression.isCast()) { 
-			entity.addRelation(buildRelation(entity,DependencyType.CAST,referredEntity));
+			entity.addRelation(buildRelation(entity,DependencyType.CAST,referredEntity,expression.getLocation()));
 			matched = true;
 		}
 		if (!matched)  {
 			if (callAsImpl && repo.getEntity(referredEntity.getQualifiedName()) instanceof MultiDeclareEntities &&
 					(referredEntity instanceof VarEntity ||referredEntity instanceof FunctionEntity)) {
-				MultiDeclareEntities m =  (MultiDeclareEntities)(repo.getEntity(referredEntity.getQualifiedName()));
-				for (Entity e:m.getEntities()) {
-					if (e==referredEntity) {
-						entity.addRelation(buildRelation(entity,DependencyType.USE,e));
-					}else {
-						entity.addRelation(buildRelation(entity,DependencyType.IMPLLINK,e));
+				if (entity.getAncestorOfType(FileEntity.class).getId().equals(referredEntity.getAncestorOfType(FileEntity.class).getId())){
+					entity.addRelation(buildRelation(entity,DependencyType.USE,referredEntity,expression.getLocation()));
+				}else {
+					MultiDeclareEntities m =  (MultiDeclareEntities)(repo.getEntity(referredEntity.getQualifiedName()));
+					for (Entity e:m.getEntities()) {
+						if (e==referredEntity) {
+							entity.addRelation(expression,buildRelation(entity,DependencyType.USE,e,expression.getLocation()));
+						}else {
+							entity.addRelation(expression,buildRelation(entity,DependencyType.IMPLLINK,e,expression.getLocation()));
+						}
+						matched = true;
 					}
-					matched = true;
 				}
 			}
 			else {
-				entity.addRelation(buildRelation(entity,DependencyType.USE,referredEntity));
+				entity.addRelation(expression,buildRelation(entity,DependencyType.USE,referredEntity,expression.getLocation()));
 			}
 		}
 	}
 
 	private Relation buildRelation(Entity from, String type, Entity referredEntity) {
+		return buildRelation(from,type,referredEntity,from.getLocation());
+	}
+
+	private Relation buildRelation(Entity from, String type, Entity referredEntity,Location location) {
 		if (referredEntity instanceof AliasEntity) {
 			if (from.getAncestorOfType(FileEntity.class).equals(referredEntity.getAncestorOfType(FileEntity.class))) {
 				AliasEntity alias = ((AliasEntity) referredEntity);
@@ -192,8 +194,8 @@ public class RelationCounter {
 			}
 		}
 		if (this.langProcessor==null)
-			return new Relation(type,referredEntity);
-		return new Relation(langProcessor.getRelationMapping(type),referredEntity);
+			return new Relation(type,referredEntity,location);
+		return new Relation(langProcessor.getRelationMapping(type),referredEntity,location);
 	}
 
 	private void computeTypeRelations(TypeEntity type) {

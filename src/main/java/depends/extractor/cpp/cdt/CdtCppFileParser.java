@@ -74,7 +74,9 @@ public class CdtCppFileParser extends CppFileParser {
 				t.setInProjectScope(true);
 			return;
 		}
-		
+		if (fileFullPath.contains("regex.h")){
+			System.out.println("stop");
+		}
 		CppVisitor bridge = new CppVisitor(fileFullPath, entityRepo, preprocessorHandler,inferer);
 		IASTTranslationUnit tu = (new CDTParser(preprocessorHandler.getIncludePaths())).parse(fileFullPath,macroMap);
 		boolean containsIncludes = false;
@@ -93,7 +95,7 @@ public class CdtCppFileParser extends CppFileParser {
 		tu.accept(bridge);
 		fileEntity = entityRepo.getEntity(fileFullPath);
 		((FileEntity)fileEntity).cacheAllExpressions();
-		((FileEntity)fileEntity).setStopLine(tu.getFileLocation().getEndingLineNumber() + 1);
+		((FileEntity)fileEntity).setEndLine(tu.getFileLocation().getEndingLineNumber() + 1);
 		try {
 			Method method = tu.getFileLocation().getClass().getMethod("getSource");
 			method.setAccessible(true);
@@ -103,6 +105,7 @@ public class CdtCppFileParser extends CppFileParser {
 			e.printStackTrace();
 		}
 		bridge.done();
+		return;
 	}
 	
 }

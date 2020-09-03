@@ -170,11 +170,4 @@ public class FileEntity extends TypeEntity {
 		}
 	}
 
-	private int loc = 0;
-	public void setLoc(int loc) {
-		this.loc = loc;
-	}
-	public int getLoc() {
-		return loc;
-	}
 }

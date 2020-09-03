@@ -24,49 +24,8 @@ SOFTWARE.
 
 package depends.extractor.cpp.cdt;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import depends.entity.*;
 
-import org.codehaus.plexus.util.StringUtils;
-import org.eclipse.cdt.core.dom.ast.ASTVisitor;
-import org.eclipse.cdt.core.dom.ast.IASTCompositeTypeSpecifier;
-import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
-import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
-import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
-import org.eclipse.cdt.core.dom.ast.IASTEnumerationSpecifier;
-import org.eclipse.cdt.core.dom.ast.IASTEnumerationSpecifier.IASTEnumerator;
-import org.eclipse.cdt.core.dom.ast.IASTExpression;
-import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
-import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
-import org.eclipse.cdt.core.dom.ast.IASTName;
-import org.eclipse.cdt.core.dom.ast.IASTNode;
-import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
-import org.eclipse.cdt.core.dom.ast.IASTProblem;
-import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
-import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTAliasDeclaration;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier.ICPPASTBaseSpecifier;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTypeId;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTUsingDeclaration;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTUsingDirective;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTLinkageSpecification;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTNamespaceAlias;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTProblemDeclaration;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTStaticAssertionDeclaration;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTTemplateDeclaration;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTTemplateSpecialization;
-import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTVisibilityLabel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import depends.entity.Entity;
-import depends.entity.FunctionEntity;
-import depends.entity.GenericName;
-import depends.entity.VarEntity;
-import depends.entity.TypeEntity;
 import depends.entity.repo.EntityRepo;
 import depends.entity.repo.IdGenerator;
 import depends.extractor.cpp.CppHandlerContext;
@@ -74,6 +33,18 @@ import depends.importtypes.ExactMatchImport;
 import depends.importtypes.FileImport;
 import depends.importtypes.PackageWildCardImport;
 import depends.relations.Inferer;
+import org.codehaus.plexus.util.StringUtils;
+import org.eclipse.cdt.core.dom.ast.*;
+import org.eclipse.cdt.core.dom.ast.IASTEnumerationSpecifier.IASTEnumerator;
+import org.eclipse.cdt.core.dom.ast.cpp.*;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier.ICPPASTBaseSpecifier;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 public class CppVisitor  extends ASTVisitor {
 	private static final Logger logger = LoggerFactory.getLogger(CppVisitor.class);
@@ -104,14 +75,8 @@ public class CppVisitor  extends ASTVisitor {
 			context.foundNewImport(new FileImport(incl));
 		}
 		MacroExtractor macroExtractor = new MacroExtractor(tu.getAllPreprocessorStatements(),context.currentFile().getQualifiedName());
-		for (String var:macroExtractor.getMacroVars()) {
-			context.foundVarDefinition(var,Inferer.buildInType.getRawName(),new ArrayList<>());
-		}
 		
-		for (String var:macroExtractor.getMacroFuncs()) {
-			context.foundMethodDeclarator(var, Inferer.buildInType.getRawName().uniqName(), new ArrayList<>());
-			context.exitLastedEntity();
-		}
+		macroExtractor.extract(context);
 		for (IASTNode child:tu.getChildren()) {
 			if (notLocalFile(child)) continue;
 			child.accept(this);
@@ -144,12 +109,16 @@ public class CppVisitor  extends ASTVisitor {
 		if (notLocalFile(namespaceDefinition)) return ASTVisitor.PROCESS_SKIP;
 		String ns = namespaceDefinition.getName().toString().replace("::", ".");
 		logger.trace("enter ICPPASTNamespaceDefinition  " + ns);
-		context.foundNamespace(ns);
+		Entity pkg = context.foundNamespace(ns);
+		setLineNumber(pkg, namespaceDefinition);
 		context.foundNewImport(new PackageWildCardImport(ns));
 		return super.visit(namespaceDefinition);
 	}
 	
-	
+	private void setLineNumber(Entity entity, IASTNode node) {
+		entity.setStartLine(node.getFileLocation().getStartingLineNumber());
+		entity.setEndLine(node.getFileLocation().getEndingLineNumber());
+	}
 	@Override
 	public int leave(ICPPASTNamespaceDefinition namespaceDefinition) {
 		if (notLocalFile(namespaceDefinition)) return ASTVisitor.PROCESS_SKIP;
@@ -162,12 +131,13 @@ public class CppVisitor  extends ASTVisitor {
 	public int visit(IASTDeclSpecifier declSpec) {
 		if (notLocalFile(declSpec)) return ASTVisitor.PROCESS_SKIP;
 		logger.trace("enter IASTDeclSpecifier  " + declSpec.getClass().getSimpleName());
-		TypeEntity typeEntity = null;
+
 		if (declSpec instanceof IASTCompositeTypeSpecifier) {
 			IASTCompositeTypeSpecifier type = (IASTCompositeTypeSpecifier)declSpec;
 			String name = ASTStringUtilExt.getName(type);
 			List<GenericName> param = ASTStringUtilExt.getTemplateParameters(type);
-			typeEntity = context.foundNewType(name);
+			TypeEntity typeEntity = context.foundNewType(name);
+			setLineNumber(typeEntity,type);
 			if (declSpec instanceof ICPPASTCompositeTypeSpecifier) {
 				ICPPASTBaseSpecifier[] baseSpecififers = ((ICPPASTCompositeTypeSpecifier)declSpec).getBaseSpecifiers();
 				for (ICPPASTBaseSpecifier baseSpecififer:baseSpecififers) {
@@ -177,13 +147,10 @@ public class CppVisitor  extends ASTVisitor {
 			}
 		}
 		else if (declSpec instanceof  IASTEnumerationSpecifier) {
-			typeEntity = context.foundNewType(ASTStringUtilExt.getName(declSpec));
+			TypeEntity typeEntity = context.foundNewType(ASTStringUtilExt.getName(declSpec));
+			setLineNumber(typeEntity,declSpec);
 		}else {
 			//we do not care other types
-		}
-		if (typeEntity != null) {
-			typeEntity.setStartLine(declSpec.getFileLocation().getStartingLineNumber());
-			typeEntity.setStopLine(declSpec.getFileLocation().getEndingLineNumber());
 		}
 		return super.visit(declSpec);
 	}
@@ -218,14 +185,10 @@ public class CppVisitor  extends ASTVisitor {
 					rawName = namedEntity.get(0).getQualifiedName();
 				}
 				returnType = reMapIfConstructDeconstruct(rawName,returnType);
-				FunctionEntity method = context.foundMethodDeclaratorProto(rawName, returnType);
-				if(decl.getChildren() != null) {
-					method.setStartLine(decl.getChildren()[decl.getChildren().length - 1].getFileLocation().getStartingLineNumber());
-					method.setStopLine(decl.getChildren()[decl.getChildren().length - 1].getFileLocation().getEndingLineNumber());
-				} else {
-					method.setStartLine(decl.getFileLocation().getStartingLineNumber());
-					method.setStopLine(decl.getFileLocation().getEndingLineNumber());
-				}
+			
+				FunctionEntity methodDeclProto = context.foundMethodDeclaratorProto(rawName, returnType);
+			
+				setLineNumber(methodDeclProto,decl);
 			}
 			else if ( declarator.getParent() instanceof IASTFunctionDefinition) {
 				IASTFunctionDefinition decl = (IASTFunctionDefinition)declarator.getParent();
@@ -237,14 +200,9 @@ public class CppVisitor  extends ASTVisitor {
 				}
 				returnType = reMapIfConstructDeconstruct(rawName,returnType);
 //				context.foundMethodDeclaratorImplementation(rawName, returnType);
-				FunctionEntity method = context.foundMethodDeclaratorImplementation(rawName, returnType);
-				if(decl.getChildren() != null) {
-					method.setStartLine(decl.getChildren()[decl.getChildren().length - 1].getFileLocation().getStartingLineNumber());
-					method.setStopLine(decl.getChildren()[decl.getChildren().length - 1].getFileLocation().getEndingLineNumber());
-				} else {
-					method.setStartLine(decl.getFileLocation().getStartingLineNumber());
-					method.setStopLine(decl.getFileLocation().getEndingLineNumber());
-				}
+				FunctionEntity methodDeclImpl = context.foundMethodDeclaratorImplementation(rawName, returnType);
+				setLineNumber(methodDeclImpl,decl);
+
 			}
 		}
 		return super.visit(declarator);
@@ -324,7 +282,8 @@ public class CppVisitor  extends ASTVisitor {
 					String varType = ASTStringUtilExt.getName(declSpecifier);
 					String varName = ASTStringUtilExt.getName(declarator);
 					if (!StringUtils.isEmpty(varType)) {
-						context.foundVarDefinition(varName, GenericName.build(varType),ASTStringUtilExt.getTemplateParameters(declSpecifier));
+						VarEntity var = context.foundVarDefinition(varName, GenericName.build(varType), ASTStringUtilExt.getTemplateParameters(declSpecifier));
+						setLineNumber(var,declarator);					
 					}else {
 						expressionUsage.foundCallExpressionOfFunctionStyle(varName,declarator);
 					}
@@ -377,14 +336,17 @@ public class CppVisitor  extends ASTVisitor {
 	public int visit(IASTEnumerator enumerator) {
 		if (notLocalFile(enumerator)) return ASTVisitor.PROCESS_SKIP;
 		logger.trace("enter IASTEnumerator  " + enumerator.getClass().getSimpleName());
-		context.foundVarDefinition(enumerator.getName().toString(), context.currentType().getRawName(),new ArrayList<>());
+		VarEntity var = context.foundVarDefinition(enumerator.getName().toString(), context.currentType().getRawName(), new ArrayList<>());
+		setLineNumber(var,enumerator);
 		return super.visit(enumerator);
 	}
 	
 	@Override
 	public int visit(IASTExpression expression) {
 		if (notLocalFile(expression)) return ASTVisitor.PROCESS_SKIP;
-		expressionUsage.foundExpression(expression);
+		Expression expr = expressionUsage.foundExpression(expression);
+		expr.setStartLine(expression.getFileLocation().getStartingLineNumber());
+		expr.setEndLine(expression.getFileLocation().getEndingLineNumber());
 		return super.visit(expression);
 	}
 
@@ -397,6 +359,7 @@ public class CppVisitor  extends ASTVisitor {
 		String parameterType = ASTStringUtilExt.getName(parameterDeclaration.getDeclSpecifier());
 		if (context.currentFunction()!=null) {
 			VarEntity var = new VarEntity(GenericName.build(parameterName),GenericName.build(parameterType),context.currentFunction(),idGenerator.generateId());
+			setLineNumber(var,parameterDeclaration);
 			context.currentFunction().addParameter(var );
 		}else {
 			//System.out.println("** parameterDeclaration = " + parameter);

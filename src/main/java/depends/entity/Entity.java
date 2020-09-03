@@ -24,15 +24,11 @@ SOFTWARE.
 
 package depends.entity;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 
 import depends.relations.Inferer;
 import depends.relations.Relation;
+import java.util.*;
 
 /**
  * Entity is the root of all entities, including file, package, module, 
@@ -52,6 +48,7 @@ public abstract class Entity {
 	private Entity actualReferTo = null;
 	private boolean inScope = true;
 	protected HashMap<String, Entity> visibleNames = new HashMap<>();
+	private Location location = new Location();	
 	public Entity() {};
     public Entity(GenericName rawName, Entity parent, Integer id) {
 		this.qualifiedName = null;
@@ -263,5 +260,28 @@ public abstract class Entity {
 		searched.add(this);
 		return visibleNames.get(name);
 	}
-	
+	public Integer getStartLine() {
+		return location.getStartLine();
+	}	
+	public void setStartLine(int lineNumber) {
+		this.location.setStartLine(lineNumber);
+	}
+
+	public Integer getEndLine() {
+		return location.getEndLine();
+	}
+	public void setEndLine(int lineNumber) {
+		this.location.setEndLine(lineNumber);
+	}
+
+	public Integer getLoc() {
+		return location.getLoc();
+	}
+	public void setLoc(int lineNumber) {
+		this.location.setLoc(lineNumber);
+	}
+
+	public Location getLocation() {
+		return this.location;
+	}
 }

@@ -57,7 +57,7 @@ public class FunctionDependencyGenerator extends DependencyGenerator {
 					if (entityTo == -1)
 						continue;
 					dependencyMatrix.addDependency(relation.getType(), entityFrom, entityTo, 1,buildDescription(entity,
-							relation.getEntity()));
+							relation.getEntity(),relation.getStartLine(),relation.getEndLine()));
 				}
 			}
 		}

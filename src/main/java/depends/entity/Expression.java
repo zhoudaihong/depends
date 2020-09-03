@@ -24,13 +24,12 @@ SOFTWARE.
 
 package depends.entity;
 
+import depends.entity.repo.EntityRepo;
+import depends.relations.Inferer;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import depends.entity.repo.EntityRepo;
-import depends.relations.Inferer;
 
 /**
  * Expression 
@@ -67,6 +66,7 @@ public class Expression implements Serializable{
 	private transient Entity referredEntity;
 	
 	private transient TypeEntity type; // the type we care - for relation calculation. 
+	private Location location = new Location();
     //for leaf, it equals to referredEntity.getType. otherwise, depends on child's type strategy
 	
 	/*
@@ -412,5 +412,20 @@ public class Expression implements Serializable{
 		    .append("parent:").append(parent==null?"nil":parent.text).append("|")
 			.append("type:").append(type).append("|");
 		return s.toString();
+	}
+	public void setStartLine(int lineNumber) {
+		this.location.setStartLine(lineNumber);
+	}
+
+	public void setEndLine(int lineNumber) {
+		this.location.setEndLine(lineNumber);
+	}
+
+	public void setLoc(int lineNumber) {
+		this.location.setLoc(lineNumber);
+	}
+
+	public Location getLocation() {
+		return location;
 	}
 }

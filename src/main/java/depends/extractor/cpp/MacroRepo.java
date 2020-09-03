@@ -34,9 +34,8 @@ public abstract class MacroRepo {
 				Map<String, IMacroBinding> macros = scanner.getMacroDefinitions();
 				for (String key : macros.keySet()) {
 					String exp = new String(macros.get(key).getExpansion());
-					if (exp.length() > 0) {
-						defaultMacroMap.put(key, exp);
-					}
+				
+					defaultMacroMap.put(macros.get(key).toString(), exp);
 
 				}
 			}

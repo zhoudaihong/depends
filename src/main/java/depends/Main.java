@@ -62,14 +62,14 @@ public class Main {
 		try {
 			List<String> commands = new ArrayList<>();
 			commands.add("-d");
-			commands.add("C:\\Users\\SongJee\\Desktop\\result");  // 分析结果要存的目录
+			commands.add("D:\\FDSE");  // 分析结果要存的目录
 			commands.add("-f");
 			commands.add("plantuml");
 //          commands.add("-i");
 //          commands.add("D:\\software\\cloc\\cJSON-1.7.12");
 			commands.add("java");
 //          commands.add("D:\\my_data\\c_demo\\tabix"); // 要分析的项目路径
-            commands.add("D:\\my_data\\SDTeam\\multi-dependency");
+            commands.add("D:\\FDSE\\multi-dependency");
 //			commands.add("D:\\my_data\\cpp_project\\leveldb-1.22-maked");
 			commands.add("test_depends_data");  // 分析结果的文件名
 			commands.add("--auto-include");

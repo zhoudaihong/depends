@@ -124,7 +124,7 @@ public class JavaListener extends JavaParserBaseListener {
 			type.setStartLine(ctx.classBody().LBRACE().getSymbol().getLine());
 		}
 		if (ctx.classBody().RBRACE() != null) {
-			type.setStopLine(ctx.classBody().RBRACE().getSymbol().getLine());
+			type.setEndLine(ctx.classBody().RBRACE().getSymbol().getLine());
 		}
 		super.enterClassDeclaration(ctx);
 	}
@@ -143,7 +143,7 @@ public class JavaListener extends JavaParserBaseListener {
 			type.setStartLine(ctx.LBRACE().getSymbol().getLine());
 		}
 		if (ctx.RBRACE() != null) {
-			type.setStopLine(ctx.RBRACE().getSymbol().getLine());
+			type.setEndLine(ctx.RBRACE().getSymbol().getLine());
 		}
 		super.enterEnumDeclaration(ctx);
 	}
@@ -156,7 +156,7 @@ public class JavaListener extends JavaParserBaseListener {
 			type.setStartLine(ctx.annotationTypeBody().LBRACE().getSymbol().getLine());
 		}
 		if (ctx.annotationTypeBody().RBRACE() != null) {
-			type.setStopLine(ctx.annotationTypeBody().RBRACE().getSymbol().getLine());
+			type.setEndLine(ctx.annotationTypeBody().RBRACE().getSymbol().getLine());
 		}
 		super.enterAnnotationTypeDeclaration(ctx);
 	}
@@ -189,7 +189,7 @@ public class JavaListener extends JavaParserBaseListener {
 			type.setStartLine(ctx.interfaceBody().LBRACE().getSymbol().getLine());
 		}
 		if (ctx.interfaceBody().RBRACE() != null) {
-			type.setStopLine(ctx.interfaceBody().RBRACE().getSymbol().getLine());
+			type.setEndLine(ctx.interfaceBody().RBRACE().getSymbol().getLine());
 		}
 		super.enterInterfaceDeclaration(ctx);
 	}
@@ -227,10 +227,10 @@ public class JavaListener extends JavaParserBaseListener {
 		BlockContext block = ctx.methodBody().block();
 		if(block != null) {
 			method.setStartLine(block.start.getLine());
-			method.setStopLine(block.stop.getLine());
+			method.setEndLine(block.stop.getLine());
 		} else {
 			method.setStartLine(ctx.start.getLine());
-			method.setStopLine(ctx.stop.getLine());
+			method.setEndLine(ctx.stop.getLine());
 		}
 	}
 
@@ -263,10 +263,10 @@ public class JavaListener extends JavaParserBaseListener {
 		BlockContext block = ctx.methodBody().block();
 		if(block != null) {
 			method.setStartLine(block.start.getLine());
-			method.setStopLine(block.stop.getLine());
+			method.setEndLine(block.stop.getLine());
 		} else {
 			method.setStartLine(ctx.start.getLine());
-			method.setStopLine(ctx.stop.getLine());
+			method.setEndLine(ctx.stop.getLine());
 		}
 	}
 
@@ -289,10 +289,10 @@ public class JavaListener extends JavaParserBaseListener {
 		BlockContext block = ctx.block();
 		if(block != null) {
 			method.setStartLine(block.start.getLine());
-			method.setStopLine(block.stop.getLine());
+			method.setEndLine(block.stop.getLine());
 		} else {
 			method.setStartLine(ctx.start.getLine());
-			method.setStopLine(ctx.stop.getLine());
+			method.setEndLine(ctx.stop.getLine());
 		}
 	}
 
