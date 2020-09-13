@@ -266,6 +266,7 @@ public abstract class ContainerEntity extends DecoratedEntity {
 		this.expressionList.clear();
 		this.expressionList=null;
 		this.expressionList = new ArrayList<>();
+		this.expressionUseList = null;
 	}
 	
 	private void cacheExpressionListToFile() {

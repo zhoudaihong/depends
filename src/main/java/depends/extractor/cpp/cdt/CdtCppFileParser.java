@@ -95,12 +95,11 @@ public class CdtCppFileParser extends CppFileParser {
 		tu.accept(bridge);
 		fileEntity = entityRepo.getEntity(fileFullPath);
 		((FileEntity)fileEntity).cacheAllExpressions();
-		((FileEntity)fileEntity).setEndLine(tu.getFileLocation().getEndingLineNumber() + 1);
 		try {
 			Method method = tu.getFileLocation().getClass().getMethod("getSource");
 			method.setAccessible(true);
 			char[] charArray = (char[]) method.invoke(tu.getFileLocation());
-			((FileEntity)fileEntity).setLoc(LocCalculator.calcLoc(new String(charArray)));
+			fileEntity.setLoc(LocCalculator.calcLoc(new String(charArray)));
 		} catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
 			e.printStackTrace();
 		}

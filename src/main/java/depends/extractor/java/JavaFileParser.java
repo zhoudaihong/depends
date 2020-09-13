@@ -67,8 +67,8 @@ public class JavaFileParser implements depends.extractor.FileParser{
 			walker.walk(bridge, ctx);
 			Entity fileEntity = entityRepo.getEntity(fileFullPath);
 			((FileEntity)fileEntity).cacheAllExpressions();
-			((FileEntity)fileEntity).setEndLine(ctx.stop.getLine());
-			((FileEntity)fileEntity).setLoc(LocCalculator.calcLoc(input.toString()));
+			fileEntity.setEndLine(ctx.stop.getLine());
+			fileEntity.setLoc(LocCalculator.calcLoc(input.toString()));
 			interpreter.clearDFA();
 			bridge.done();
 	    }catch (Exception e) {
