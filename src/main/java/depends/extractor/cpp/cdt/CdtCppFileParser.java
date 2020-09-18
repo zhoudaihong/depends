@@ -95,6 +95,7 @@ public class CdtCppFileParser extends CppFileParser {
 		tu.accept(bridge);
 		fileEntity = entityRepo.getEntity(fileFullPath);
 		((FileEntity)fileEntity).cacheAllExpressions();
+		fileEntity.setEndLine(tu.getFileLocation().getEndingLineNumber() + 1);
 		try {
 			Method method = tu.getFileLocation().getClass().getMethod("getSource");
 			method.setAccessible(true);
