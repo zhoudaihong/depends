@@ -25,6 +25,7 @@ SOFTWARE.
 package depends.extractor;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.*;
@@ -50,35 +51,35 @@ import multilang.depends.util.file.FileUtil;
 abstract public class AbstractLangProcessor {
 	/**
 	 * The name of the lang
-	 * 
+	 *
 	 * @return
 	 */
 	public abstract String supportedLanguage();
 
 	/**
 	 * The file suffixes in the lang
-	 * 
+	 *
 	 * @return
 	 */
 	public abstract String[] fileSuffixes();
 
 	/**
 	 * Strategy of how to lookup types and entities in the lang.
-	 * 
+	 *
 	 * @return
 	 */
 	public abstract ImportLookupStrategy getImportLookupStrategy();
 
 	/**
 	 * The builtInType of the lang.
-	 * 
+	 *
 	 * @return
 	 */
 	public abstract BuiltInType getBuiltInType();
 
 	/**
 	 * The language specific file parser
-	 * 
+	 *
 	 * @param fileFullPath
 	 * @return
 	 */
@@ -95,7 +96,7 @@ abstract public class AbstractLangProcessor {
 	private List<String> includePaths;
 	private static Logger logger = LoggerFactory.getLogger(AbstractLangProcessor.class);
 	public List<String> excludePaths;
-	
+
 	public AbstractLangProcessor(boolean eagerExpressionResolve) {
 		entityRepo = new InMemoryEntityRepo();
 		inferer = new Inferer(entityRepo, getImportLookupStrategy(), getBuiltInType(), eagerExpressionResolve);
@@ -105,11 +106,11 @@ abstract public class AbstractLangProcessor {
 	 * The process steps of build dependencies. Step 1: parse all files, add
 	 * entities and expression into repositories Step 2: resolve bindings of files
 	 * (if not resolved yet) Step 3: identify dependencies
-	 * 
+	 *
 	 * @param includeDir
 	 * @param inputDir
-	 * @param b 
-	 * @param b 
+	 * @param b
+	 * @param b
 	 */
 	public void buildDependencies(String inputDir, String[] includeDir, List<String> typeFilter, boolean callAsImpl, boolean isCollectUnsolvedBindings, boolean isDuckTypingDeduce, List<String> excludePaths) {
 		this.inputSrcPath = inputDir;
@@ -131,6 +132,40 @@ abstract public class AbstractLangProcessor {
 			logger.info("Heap Information: " + ManagementFactory.getMemoryMXBean().getHeapMemoryUsage());
 		}
 //		identifyDependencies();
+//		String path = "D:\\FDSE\\output.txt";
+//		File file = new File(path);
+//		//如果文件不存在，则自动生成文件；
+//		if(!file.exists()){
+//			try{
+//				file.createNewFile();
+//			}catch (IOException e){
+//				e.printStackTrace();
+//			}
+//		}
+//		try{
+//			//引入输出流
+//			FileOutputStream outPutStream = new FileOutputStream(file);
+//			StringBuilder stringBuilder = new StringBuilder();
+//			Iterator it = entityRepo.entityIterator();
+//			while(it.hasNext()){
+//				Entity entity = (Entity)it.next();
+//				stringBuilder.delete(0,stringBuilder.length());
+//				stringBuilder.append("-------------" + entity.getClass() + " " + entity + "\n");
+//				entity.getRelations().forEach(relation -> {
+//					stringBuilder.append(relation.getType() + " " + relation.getEntity().getClass() + " " + relation.getEntity() + "\n");
+//				});
+//				String context = stringBuilder.toString();//将可变字符串变为固定长度的字符串，方便下面的转码；
+//				try{
+//					byte[]  bytes = context.getBytes("UTF-8");//因为中文可能会乱码，这里使用了转码，转成UTF-8；
+//					outPutStream.write(bytes);//写入内容到文件；
+//				}catch (Exception e){
+//					e.printStackTrace();
+//				}
+//			}
+//			outPutStream.close();
+//		}catch(Exception e){
+//			e.printStackTrace();//获取异常
+//		}
 		logger.info("Dependencie data generating done successfully...");
 	}
 
@@ -148,12 +183,12 @@ abstract public class AbstractLangProcessor {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param callAsImpl
 	 * @return unsolved bindings
 	 */
 	public void resolveBindings(boolean callAsImpl) {
-	    logger.info("Resolve types and bindings of variables, methods and expressions....");
+		logger.info("Resolve types and bindings of variables, methods and expressions....");
 //		System.out.println("Resolve types and bindings of variables, methods and expressions....");
 		this.potentialExternalDependencies = inferer.resolveAllBindings(callAsImpl,this);
 		if (getExternalDependencies().size() > 0) {

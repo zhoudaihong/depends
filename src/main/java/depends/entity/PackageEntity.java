@@ -29,7 +29,7 @@ import java.util.HashSet;
 
 public class PackageEntity extends TypeEntity {
 	HashMap<String,Entity> entities	 = new HashMap<>();
-	
+
 	public PackageEntity() {}
 
 	public PackageEntity(String rawName, Integer id) {
@@ -43,7 +43,7 @@ public class PackageEntity extends TypeEntity {
 
 	public Entity getChildOfName(String name) {
 		for (Entity child:this.getChildren()) {
-			if (child.getRawName().equals(name)) 
+			if (child.getRawName().equals(name))
 				return child;
 		}
 		if (entities.get(name)!=null)
@@ -56,7 +56,7 @@ public class PackageEntity extends TypeEntity {
 		entities.put(moduleName, entity);
 		visibleNames.put(moduleName, entity);
 	}
-	
+
 	@Override
 	public Entity getByName(String name, HashSet<Entity> searched) {
 		Entity entity = super.getByName(name, searched);
@@ -70,6 +70,16 @@ public class PackageEntity extends TypeEntity {
 			}
 		}
 		return null;
+	}
+
+	private String javaPath = null;
+
+	public String getJavaPath() {
+		return javaPath;
+	}
+
+	public void setJavaPath(String javaPath) {
+		this.javaPath = javaPath;
 	}
 
 }

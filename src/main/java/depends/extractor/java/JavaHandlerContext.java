@@ -25,6 +25,7 @@ SOFTWARE.
 package depends.extractor.java;
 
 import depends.entity.Entity;
+import depends.entity.MultiDeclareEntities;
 import depends.entity.PackageEntity;
 import depends.entity.repo.EntityRepo;
 import depends.extractor.HandlerContext;
@@ -40,7 +41,20 @@ public class JavaHandlerContext extends HandlerContext {
 		Entity pkgEntity = entityRepo.getEntity(packageName);
 		if (pkgEntity == null) {
 			pkgEntity = new PackageEntity(packageName, idGenerator.generateId());
+			((PackageEntity)pkgEntity).setJavaPath(PathConverter.File2Package(currentFileEntity.getQualifiedName(),packageName));
 			entityRepo.add(pkgEntity);
+		}else{
+			if(pkgEntity instanceof MultiDeclareEntities){
+				for(Entity e : ((MultiDeclareEntities) pkgEntity).getEntities()){
+					if(PathConverter.File2Package(currentFileEntity.getQualifiedName(),packageName).equals(((PackageEntity)e).getJavaPath())){
+						pkgEntity = e;
+					}
+				}
+			}else if( !((PathConverter.File2Package(currentFileEntity.getQualifiedName(),packageName)).equals(((PackageEntity)pkgEntity).getJavaPath())) ){
+				pkgEntity = new PackageEntity(packageName, idGenerator.generateId());
+				((PackageEntity)pkgEntity).setJavaPath(PathConverter.File2Package(currentFileEntity.getQualifiedName(),packageName));
+				entityRepo.add(pkgEntity);
+			}
 		}
 		Entity.setParent(currentFileEntity,pkgEntity);
 		return pkgEntity;

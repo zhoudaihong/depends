@@ -8,29 +8,39 @@ import java.util.*;
 
 public class MultiDeclareResolve {
 
-    public static int getDistanceOfParent(Entity entity,FileEntity destination) {
+    public static int getDistanceOfParent(Entity entity,Entity destination) {
         Entity parentOfEntity = entity;
+        Entity parentOfDestination = destination;
         while( parentOfEntity.getClass() != FileEntity.class) {
             parentOfEntity = parentOfEntity.getParent();
         }
+        while( parentOfDestination.getClass() != FileEntity.class) {
+            parentOfDestination = parentOfDestination.getParent();
+        }
         int distance = 0;
         int lengthOfThis = parentOfEntity.getQualifiedName().length();
-        int lengthOfOther = destination.getQualifiedName().length();
+        int lengthOfOther = parentOfDestination.getQualifiedName().length();
 
-        for(int i = 0; i < (lengthOfThis < lengthOfOther ? lengthOfThis : lengthOfOther); ++i) {
-            if(parentOfEntity.getQualifiedName().charAt(i) == destination.getQualifiedName().charAt(i))
-            ++distance;
+        char[] parentOfEntityName =  parentOfEntity.getQualifiedName().toCharArray();
+        char[] destinationName = parentOfDestination.getQualifiedName().toCharArray();
+
+        for(int i = 0; i < Math.min(lengthOfThis,lengthOfOther); ++i) {
+            if(parentOfEntityName[i] == destinationName[i]){
+                ++distance;
+            }else{
+                break;
+            }
         }
 
         return distance;
     }
 
-    public static List<Entity> selectMostRelative(MultiDeclareEntities multiDeclareEntities,FileEntity destination) {
-        List<Entity> result = new ArrayList();
-        Map<Entity, Integer> distances = new HashMap();
+    public static List<Entity> selectMostRelative(MultiDeclareEntities multiDeclareEntities,Entity destination) {
+        List<Entity> result = new ArrayList<>();
+        Map<Entity, Integer> distances = new HashMap<>();
         int max = -1;
         for (Entity entity:multiDeclareEntities.getEntities()
-             ) {
+        ) {
             int distance = getDistanceOfParent(entity,destination);
             distances.put(entity, distance);
             if (distance > max) {

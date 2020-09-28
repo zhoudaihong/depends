@@ -73,7 +73,7 @@ public class Inferer {
 	 * Resolve all bindings
 	 * - Firstly, we resolve all types from there names.
 	 * - Secondly, we resolve all expressions (expression will use type infomation of previous step
-	 * @param langProcessor 
+	 * @param langProcessor
 	 */
 	public  Set<UnsolvedBindings> resolveAllBindings(boolean callAsImpl, AbstractLangProcessor langProcessor) {
 //		System.out.println("Resolve type bindings....");
@@ -86,17 +86,17 @@ public class Inferer {
 			logger.info("Dependency analaysing...");
 		}
 		logger.info("Heap Information: " + ManagementFactory.getMemoryMXBean().getHeapMemoryUsage());
-		
-		new RelationCounter(repo.getFileEntities(),this,repo,callAsImpl,langProcessor).computeRelations();
+
+		new MyRelationCounter(repo.getFileEntities(),this,repo,callAsImpl,langProcessor).computeRelations();
 //		System.out.println("Dependency done....");
 		logger.info("Dependency done....");
-		return unsolvedSymbols;		
+		return unsolvedSymbols;
 	}
 
 	public  Set<UnsolvedBindings> resolveAllBindings() {
-		return resolveAllBindings(false,null);		
+		return resolveAllBindings(false,null);
 	}
-	
+
 	private void resolveTypes() {
 		Iterator<Entity> iterator = repo.sortedFileIterator();
 		while(iterator.hasNext()) {
@@ -104,7 +104,7 @@ public class Inferer {
 			entity.inferEntities(this);
 		}
 	}
-	
+
 	/**
 	 * For types start with the prefix, it will be treated as built-in type
 	 * For example, java.io.* in Java, or __ in C/C++
@@ -114,7 +114,7 @@ public class Inferer {
 	public boolean isBuiltInTypePrefix(String prefix) {
 		return buildInTypeManager.isBuiltInTypePrefix(prefix);
 	}
-	
+
 	/**
 	 * Different languages have different strategy on how to compute the imported types
 	 * and the imported files.
@@ -137,7 +137,7 @@ public class Inferer {
 
 	private void addUnsolvedBinding(UnsolvedBindings item) {
 		if (!isCollectUnsolvedBindings) return;
-		 	this.unsolvedSymbols.add(item);
+		this.unsolvedSymbols.add(item);
 	}
 
 	public Collection<Entity> getImportedFiles(List<Import> importedNames) {
@@ -210,7 +210,7 @@ public class Inferer {
 					break;
 				}
 			}
-			
+
 			indexCount++;
 			if (name.contains("."))
 				name = name.substring(0,name.lastIndexOf('.'));
@@ -229,7 +229,7 @@ public class Inferer {
 		// then find the subsequent symbols
 		return findEntitySince(entity, names, names.length-indexCount);
 	}
-	
+
 	private Entity lookupEntity(Entity fromEntity, String name, boolean searchImport) {
 		if (name.equals("this") || name.equals("class") ) {
 			TypeEntity entityType = (TypeEntity) (fromEntity.getAncestorOfType(TypeEntity.class));
@@ -238,7 +238,7 @@ public class Inferer {
 			TypeEntity parent = (TypeEntity) (fromEntity.getAncestorOfType(TypeEntity.class));
 			if (parent != null) {
 				TypeEntity parentType = parent.getInheritedType();
-				if (parentType!=null) 
+				if (parentType!=null)
 					return parentType;
 			}
 		}
@@ -266,9 +266,9 @@ public class Inferer {
 			return null;
 		}
 		//If it is not an entity with types (not a type, var, function), fall back to itself
-		if (precendenceEntity.getType()==null) 
+		if (precendenceEntity.getType()==null)
 			return precendenceEntity;
-			
+
 		for (Entity child : precendenceEntity.getType().getChildren()) {
 			if (child.getRawName().getName().equals(names[nameIndex])) {
 				return findEntitySince(child, names, nameIndex + 1);
@@ -304,7 +304,7 @@ public class Inferer {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Deduce type based on function calls
 	 * If the function call is a subset of a type, then the type could be a candidate of the var's type 
@@ -316,7 +316,7 @@ public class Inferer {
 		if (buildInTypeManager.isBuildInTypeMethods(functionCalls)) {
 			return new ArrayList<>();
 		}
-		if (!isDuckTypingDeduce) 
+		if (!isDuckTypingDeduce)
 			return new ArrayList<>();
 		return searchTypesInRepo(fromEntity, functionCalls);
 	}
@@ -353,7 +353,7 @@ public class Inferer {
 	public void setDuckTypingDeduce(boolean isDuckTypingDeduce) {
 		this.isDuckTypingDeduce = isDuckTypingDeduce;
 	}
-	
+
 
 
 
