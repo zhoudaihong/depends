@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import depends.extractor.java.JavaImportLookupStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -127,7 +128,12 @@ public class Inferer {
 
 	public Collection<Entity> getImportedTypes(List<Import> importedNames, FileEntity fileEntity) {
 		HashSet<UnsolvedBindings> unsolved = new HashSet<UnsolvedBindings>();
-		Collection<Entity> result = importLookupStrategy.getImportedTypes(importedNames, repo,unsolved);
+		Collection<Entity> result = new ArrayList<>();
+		if(importLookupStrategy instanceof JavaImportLookupStrategy){
+			result = ((JavaImportLookupStrategy)importLookupStrategy).getImportedTypes(importedNames, repo,unsolved, fileEntity);
+		}else{
+			result = importLookupStrategy.getImportedTypes(importedNames, repo,unsolved);
+		}
 		for (UnsolvedBindings item:unsolved) {
 			item.setFromEntity(fileEntity);
 			addUnsolvedBinding(item);

@@ -45,10 +45,17 @@ public class JavaHandlerContext extends HandlerContext {
 			entityRepo.add(pkgEntity);
 		}else{
 			if(pkgEntity instanceof MultiDeclareEntities){
+				boolean findFlag = false;
 				for(Entity e : ((MultiDeclareEntities) pkgEntity).getEntities()){
 					if(PathConverter.File2Package(currentFileEntity.getQualifiedName(),packageName).equals(((PackageEntity)e).getJavaPath())){
 						pkgEntity = e;
+						findFlag = true;
+						break;
 					}
+				}if(!findFlag){
+					pkgEntity = new PackageEntity(packageName, idGenerator.generateId());
+					((PackageEntity)pkgEntity).setJavaPath(PathConverter.File2Package(currentFileEntity.getQualifiedName(),packageName));
+					entityRepo.add(pkgEntity);
 				}
 			}else if( !((PathConverter.File2Package(currentFileEntity.getQualifiedName(),packageName)).equals(((PackageEntity)pkgEntity).getJavaPath())) ){
 				pkgEntity = new PackageEntity(packageName, idGenerator.generateId());

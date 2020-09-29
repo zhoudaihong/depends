@@ -24,14 +24,17 @@ SOFTWARE.
 
 package depends.extractor.java;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import depends.entity.Entity;
 import depends.entity.FileEntity;
+import depends.entity.MultiDeclareEntities;
 import depends.entity.PackageEntity;
 import depends.entity.repo.EntityRepo;
+import depends.extractor.MultiDeclareResolve;
 import depends.extractor.UnsolvedBindings;
 import depends.importtypes.Import;
 import depends.relations.ImportLookupStrategy;
@@ -42,7 +45,14 @@ public class JavaImportLookupStrategy implements ImportLookupStrategy{
 	public Entity lookupImportedType(String name, FileEntity fileEntity, EntityRepo repo, Inferer inferer) {
 		//Java Strategy
 		String importedString = fileEntity.importedSuffixMatch(name);
-		if (importedString==null) return null;	
+		if (importedString==null) return null;
+		Entity result = repo.getEntity(importedString);
+		if(result instanceof MultiDeclareEntities){
+			List<Entity> temp = MultiDeclareResolve.selectMostRelative((MultiDeclareEntities) result,fileEntity);
+			if(temp.size() == 1){
+				return temp.get(0);
+			}
+		}
 		return repo.getEntity(importedString);
 	}
 
@@ -72,6 +82,35 @@ public class JavaImportLookupStrategy implements ImportLookupStrategy{
 				continue;
 			}
 			if (imported instanceof PackageEntity) { 
+				//expand import of package to all classes under the package due to we dis-courage the behavior
+				for (Entity child:imported.getChildren()) {
+					if (child instanceof FileEntity) {
+						child.getChildren().forEach(item->result.add(item));
+					}else {
+						result.add(child);
+					}
+				}
+			}else {
+				result.add(imported);
+			}
+		}
+		return result;
+	}
+
+	//for multideclareentities
+	public List<Entity> getImportedTypes(List<Import> importedList, EntityRepo repo, Set<UnsolvedBindings> unsolvedBindings,FileEntity fileEntity) {
+		ArrayList<Entity> result = new ArrayList<>();
+		for (Import importedItem:importedList) {
+			Entity imported = repo.getEntity(importedItem.getContent());
+			if (imported==null) {
+				unsolvedBindings.add(new UnsolvedBindings(importedItem.getContent(),null));
+				continue;
+			}
+			if(imported instanceof MultiDeclareEntities){
+				List<Entity> temp = MultiDeclareResolve.selectMostRelative((MultiDeclareEntities) imported,fileEntity);
+				result.addAll(temp);
+			}
+			if (imported instanceof PackageEntity) {
 				//expand import of package to all classes under the package due to we dis-courage the behavior
 				for (Entity child:imported.getChildren()) {
 					if (child instanceof FileEntity) {
