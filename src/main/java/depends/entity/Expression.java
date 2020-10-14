@@ -42,7 +42,7 @@ public class Expression implements Serializable{
 	private GenericName rawType;        // the raw type name
 	private GenericName identifier;     // the varName, or method name, etc.
 	private boolean isSet = false;       // is a set relation from right to leftHand
-	private boolean isDot = false;       // is a dot expression, will decuce variable tfype left to right
+	private boolean isDot = false;       // is a dot expression, will deduce variable type left to right
 	private boolean isCall = false;
 	private boolean isLogic = false;
 	private boolean isCreate = false;

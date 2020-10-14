@@ -13,9 +13,11 @@ public class MultiDeclareResolve {
         Entity parentOfDestination = destination;
         while( parentOfEntity.getClass() != FileEntity.class) {
             parentOfEntity = parentOfEntity.getParent();
+            if(parentOfEntity == null) return -1;
         }
         while( parentOfDestination.getClass() != FileEntity.class) {
             parentOfDestination = parentOfDestination.getParent();
+            if(parentOfDestination == null) return -1;
         }
         int distance = 0;
         int lengthOfThis = parentOfEntity.getQualifiedName().length();
