@@ -27,7 +27,6 @@ package depends.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import depends.extractor.MultiDeclareResolve;
 import depends.relations.Inferer;
 
 public class VarEntity extends ContainerEntity {
@@ -66,12 +65,6 @@ public class VarEntity extends ContainerEntity {
 		if (entity!=null) {
 			this.setActualReferTo(entity);
 			type = entity.getType();
-			if(type != null && type.getMutliDeclare() != null){
-				List<Entity> mostRelatedMulti = MultiDeclareResolve.selectMostRelative(type.getMutliDeclare(),this);
-				if(!mostRelatedMulti.contains(type)){
-					type = (TypeEntity) mostRelatedMulti.get(0);
-				}
-			}
 			if (type==null) {
 				if (((ContainerEntity)getParent()).isGenericTypeParameter(rawType)) {
 					type = Inferer.genericParameterType;
