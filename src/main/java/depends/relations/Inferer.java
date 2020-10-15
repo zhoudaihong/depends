@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Set;
 
 import depends.extractor.java.JavaImportLookupStrategy;
+import depends.extractor.java.JavaProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,8 +89,12 @@ public class Inferer {
 		}
 		logger.info("Heap Information: " + ManagementFactory.getMemoryMXBean().getHeapMemoryUsage());
 
-		new MyRelationCounter(repo.getFileEntities(),this,repo,callAsImpl,langProcessor).computeRelations();
-//		System.out.println("Dependency done....");
+		if(langProcessor instanceof JavaProcessor) {
+			new MyRelationCounter(repo.getFileEntities(), this, repo, callAsImpl, langProcessor).computeRelations();
+		}else{
+			new RelationCounter(repo.getFileEntities(), this, repo, callAsImpl, langProcessor).computeRelations();
+		}
+		//		System.out.println("Dependency done....");
 		logger.info("Dependency done....");
 		return unsolvedSymbols;
 	}
