@@ -44,10 +44,25 @@ public class AliasEntity extends Entity {
 		super(simpleName, parent, id);
 		this.originName = originTypeName;
 	}
+	public AliasEntity(GenericName simpleName, int offset, Entity parent, Integer id, GenericName originTypeName) {
+		super(simpleName, parent, id);
+		this.originName = originTypeName;
+		this.setOffsetInFile(offset);
+	}
 
 	public void inferLocalLevelEntities(Inferer inferer) {
 		if (!(referToEntity instanceof EmptyTypeEntity)) return;
 		Entity entity = inferer.resolveName(this, originName, true);
+		if(originName.getName().length() == 0 && entity.getOffsetInFile() != this.getOffsetInFile()){
+			for(Entity entity1 : entity.getAncestorOfType(FileEntity.class).getChildren()){
+				if(entity1.getOffsetInFile() == this.getOffsetInFile()){
+					if(entity1 == this){
+						continue;
+					}
+					entity = entity1;
+				}
+			}
+		}
 		while(entity instanceof AliasEntity) {
 			AliasEntity aliasEntity = (AliasEntity)entity;
 			if (this.referPath.contains(aliasEntity)) {

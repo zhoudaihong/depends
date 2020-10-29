@@ -284,4 +284,14 @@ public abstract class Entity {
 	public Location getLocation() {
 		return this.location;
 	}
+
+	public int getOffsetInFile() {
+		return offsetInFile;
+	}
+
+	public void setOffsetInFile(int offsetInFile) {
+		this.offsetInFile = offsetInFile;
+	}
+
+	private int offsetInFile = -1;
 }

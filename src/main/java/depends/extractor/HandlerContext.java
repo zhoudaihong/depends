@@ -79,6 +79,15 @@ public abstract class HandlerContext {
 		 	currentFileEntity.addType(currentTypeEntity);
 			return currentTypeEntity;		
 	}
+
+	public TypeEntity foundNewType(GenericName name,int offset) {
+		TypeEntity currentTypeEntity = new TypeEntity(name, offset, this.latestValidContainer(),
+				idGenerator.generateId());
+		pushToStack(currentTypeEntity);
+		addToRepo(currentTypeEntity);
+		currentFileEntity.addType(currentTypeEntity);
+		return currentTypeEntity;
+	}
 	
 	/**
 	 * Tell the context object that a new type founded.
@@ -89,13 +98,27 @@ public abstract class HandlerContext {
 		return foundNewType(GenericName.build(name));
 	}
 
+	public TypeEntity foundNewType(String name,int offset) {
+		return foundNewType(GenericName.build(name),offset);
+	}
+
+
 	public AliasEntity foundNewAlias(String aliasName, String originalName) {
-		if (aliasName.equals(originalName)) return null; //it is a tricky, we treat same name no different. 
+		if (aliasName.equals(originalName)) return null; //it is a tricky, we treat same name no different.
 		//indeed it is not perfect -> the right match should depends on no-bare format like "struct a" instead of "a"
 		AliasEntity currentTypeEntity = new AliasEntity(GenericName.build(aliasName), this.latestValidContainer(),
 				idGenerator.generateId(),GenericName.build(originalName) );
 	 	addToRepo(currentTypeEntity);
-		return currentTypeEntity;		
+		return currentTypeEntity;
+	}
+
+	public AliasEntity foundNewAlias(String aliasName, String originalName,int offset) {
+		if (aliasName.equals(originalName)) return null; //it is a tricky, we treat same name no different.
+		//indeed it is not perfect -> the right match should depends on no-bare format like "struct a" instead of "a"
+		AliasEntity currentTypeEntity = new AliasEntity(GenericName.build(aliasName), offset, this.latestValidContainer(),
+				idGenerator.generateId(),GenericName.build(originalName));
+		addToRepo(currentTypeEntity);
+		return currentTypeEntity;
 	}
 	
 	public AliasEntity foundNewAlias(GenericName aliasName, Entity referToEntity) {

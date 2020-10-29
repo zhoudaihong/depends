@@ -136,7 +136,8 @@ public class CppVisitor  extends ASTVisitor {
 			IASTCompositeTypeSpecifier type = (IASTCompositeTypeSpecifier)declSpec;
 			String name = ASTStringUtilExt.getName(type);
 			List<GenericName> param = ASTStringUtilExt.getTemplateParameters(type);
-			TypeEntity typeEntity = context.foundNewType(name);
+			//TypeEntity typeEntity = context.foundNewType(name);
+			TypeEntity typeEntity = context.foundNewType(name,declSpec.getFileLocation().getNodeOffset());
 			setLineNumber(typeEntity,type);
 			if (declSpec instanceof ICPPASTCompositeTypeSpecifier) {
 				ICPPASTBaseSpecifier[] baseSpecififers = ((ICPPASTCompositeTypeSpecifier)declSpec).getBaseSpecifiers();
@@ -147,7 +148,7 @@ public class CppVisitor  extends ASTVisitor {
 			}
 		}
 		else if (declSpec instanceof  IASTEnumerationSpecifier) {
-			TypeEntity typeEntity = context.foundNewType(ASTStringUtilExt.getName(declSpec));
+			TypeEntity typeEntity = context.foundNewType(ASTStringUtilExt.getName(declSpec),declSpec.getFileLocation().getNodeOffset());
 			setLineNumber(typeEntity,declSpec);
 		}else {
 			//we do not care other types
@@ -277,7 +278,8 @@ public class CppVisitor  extends ASTVisitor {
 				IASTDeclSpecifier declSpecifier = ((IASTSimpleDeclaration) declaration).getDeclSpecifier();
 				//Found new typedef definition
 				if (declSpecifier.getStorageClass()==IASTDeclSpecifier.sc_typedef) {
-					context.foundNewAlias(ASTStringUtilExt.getName(declarator),ASTStringUtilExt.getName(declSpecifier));
+					//context.foundNewAlias(ASTStringUtilExt.getName(declarator),ASTStringUtilExt.getName(declSpecifier));
+					context.foundNewAlias(ASTStringUtilExt.getName(declarator),ASTStringUtilExt.getName(declSpecifier),declaration.getFileLocation().getNodeOffset());
 				}else if (!(declarator instanceof IASTFunctionDeclarator)) {
 					String varType = ASTStringUtilExt.getName(declSpecifier);
 					String varName = ASTStringUtilExt.getName(declarator);

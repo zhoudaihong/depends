@@ -42,6 +42,12 @@ public class TypeEntity extends ContainerEntity {
 		inhertedTypeIdentifiers = new ArrayList<>();
 		implementedIdentifiers = new ArrayList<>();
 	}
+	public TypeEntity(GenericName simpleName, int offset, Entity parent, Integer id) {
+		super(simpleName, parent, id);
+		this.setOffsetInFile(offset);
+		inhertedTypeIdentifiers = new ArrayList<>();
+		implementedIdentifiers = new ArrayList<>();
+	}
 
 	@Override
 	public void inferLocalLevelEntities(Inferer inferer) {
