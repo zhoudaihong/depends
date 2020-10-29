@@ -3,7 +3,12 @@ package depends.extractor.java;
 public class PathConverter {
     public static String File2Package(String filePath,String packageName){
         String result = null;
-        String tempPackagePath = packageName.replace('.','\\');
+        String tempPackagePath;
+        if(filePath.contains("/")){
+            tempPackagePath = packageName.replace('.','/');
+        }else{
+            tempPackagePath = packageName.replace('.','\\');
+        }
         int numOfSpace = 0;
         for(int i = 0;i < tempPackagePath.length();i++){
             if(tempPackagePath.charAt(i) == ' '){
