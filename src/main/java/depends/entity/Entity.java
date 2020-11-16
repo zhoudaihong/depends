@@ -24,10 +24,9 @@ SOFTWARE.
 
 package depends.entity;
 
-
-
 import depends.relations.Inferer;
 import depends.relations.Relation;
+
 import java.util.*;
 
 /**
@@ -48,7 +47,7 @@ public abstract class Entity {
 	private Entity actualReferTo = null;
 	private boolean inScope = true;
 	protected HashMap<String, Entity> visibleNames = new HashMap<>();
-	private Location location = new Location();	
+	private Location location = new Location();
 	public Entity() {};
     public Entity(GenericName rawName, Entity parent, Integer id) {
 		this.qualifiedName = null;

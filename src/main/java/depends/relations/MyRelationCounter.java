@@ -145,7 +145,7 @@ public class MyRelationCounter {
                     }
                 }
             }
-            buildAndAddRelation(entity,DependencyType.CALL,referredEntity,expression.getLocation());
+             buildAndAddRelation(entity,DependencyType.CALL,referredEntity,expression.getLocation());
             matched = true;
         }
         if (expression.isCreate()) {
@@ -214,6 +214,8 @@ public class MyRelationCounter {
             List<Entity> resolvedMulti = MultiDeclareResolve.selectMostRelative(referredEntity.getMutliDeclare(),from);
             if(!resolvedMulti.contains(referredEntity)){
                 from.addRelation(new Relation(type, resolvedMulti.get(0) ,resolvedMulti.get(0).getLocation()));
+            }else{
+                from.addRelation(new Relation(type, referredEntity, location));
             }
             return ;
         }
@@ -244,6 +246,8 @@ public class MyRelationCounter {
             List<Entity> resolvedMulti = MultiDeclareResolve.selectMostRelative(referredEntity.getMutliDeclare(),from);
             if(!resolvedMulti.contains(referredEntity)){
                 ((ContainerEntity)from).addRelation(expression,new Relation(type, resolvedMulti.get(0) ,resolvedMulti.get(0).getLocation()));
+            }else{
+                ((ContainerEntity)from).addRelation(expression,new Relation(type, referredEntity ,referredEntity.getLocation()));
             }
             return ;
         }

@@ -59,7 +59,7 @@ public class ExpressionUsage {
 			context.lastContainer().addExpression(ctx, expression);
 			expression.setParent(parent);
 		}
-
+		
 		if (isTerminalExpression(ctx)) {
 			tryFillExpressionTypeAndIdentifier(ctx,expression);
 			return expression;
@@ -96,7 +96,7 @@ public class ExpressionUsage {
 			expression.disableDriveTypeFromChild();
 
 		}
-		if (expression.isDot()) {
+		if (expression.isDot() ) {
 			if (ctx instanceof  IASTBinaryExpression) {
 				IASTExpression op2 = ((IASTBinaryExpression) ctx).getOperand2();
 				if (op2 instanceof IASTIdExpression)
@@ -106,7 +106,7 @@ public class ExpressionUsage {
 				else if (op2 instanceof IASTFunctionCallExpression)
 					expression.setIdentifier(getMethodCallIdentifier((IASTFunctionCallExpression) op2));
 			}
-		}		
+		}
 		return expression;
 	}
 

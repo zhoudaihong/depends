@@ -109,4 +109,80 @@ public class InMemoryEntityRepo extends SimpleIdGenerator implements EntityRepo 
 		allFileEntitiesByOrder.add(fileEntity);
 	}
 
+//	public boolean checkForOne(Relation relation, Entity entity){
+//		if (relation.getEntity().getMutliDeclare() != null) {
+//			List<Entity> e = new ArrayList<>();
+//			e = MultiDeclareResolve.selectMostRelative(relation.getEntity().getMutliDeclare(), entity);
+//			if (!e.contains(relation.getEntity())) {
+//				return false;
+//			}
+//		}
+//		return true;
+//	}
+//
+//	private Map<Entity,Relation> wrongRelations = new HashMap<>();
+//
+//	public void checkRelations(){
+//		for(Entity entity:allEntitiesById.values()){
+//			if(entity.getAncestorOfType(FileEntity.class) != null) {
+//				for (Relation relation : entity.getRelations()) {
+//					if (checkForOne(relation, entity) == false) {
+//						wrongRelations.put(entity,relation);
+//					}
+//				}
+//			}
+//		}
+//	}
+//
+//	private Map<Entity,Relation> contain0 = new HashMap<>();
+//	private Map<Entity,Relation> parameter0 = new HashMap<>();
+//	private Map<Entity,Relation> annotation0 = new HashMap<>();
+//	private Map<Entity,Relation> use0 = new HashMap<>();
+//	private Map<Entity,Relation> mixin0 = new HashMap<>();
+//	private Map<Entity,Relation> call0 = new HashMap<>();
+//	private Map<Entity,Relation> impllink0 = new HashMap<>();
+//	private Map<Entity,Relation> create0 = new HashMap<>();
+//	private Map<Entity,Relation> throw0 = new HashMap<>();
+//	private Map<Entity,Relation> cast0 = new HashMap<>();
+//	private Map<Entity,Relation> inherit0 = new HashMap<>();
+//	private Map<Entity,Relation> implement0 = new HashMap<>();
+//	private Map<Entity,Relation> return0 = new HashMap<>();
+//	private Map<Entity,Relation> import0 = new HashMap<>();
+//
+//	public void checkRelations(){
+//		for(Entity entity:allEntitiesById.values()){
+//			for (Relation relation : entity.getRelations()) {
+//				if(relation.getType().equals("Contain") && !relation.getEntity().getQualifiedName().equals("built-in")){
+//					contain0.put(entity,relation);
+//				}else if(relation.getType().equals("Parameter")){
+//					parameter0.put(entity,relation);
+//				}else if(relation.getType().equals("Annotation")){
+//					annotation0.put(entity,relation);
+//				}else if(relation.getType().equals("Use")){
+//					use0.put(entity,relation);
+//				}else if(relation.getType().equals("MixIn")){
+//					mixin0.put(entity,relation);
+//				}else if(relation.getType().equals("Call")){
+//					call0.put(entity,relation);
+//				}else if(relation.getType().equals("ImplLink")){
+//					impllink0.put(entity,relation);
+//				}else if(relation.getType().equals("Creat")){
+//					create0.put(entity,relation);
+//				}else if(relation.getType().equals("Throw")){
+//					throw0.put(entity,relation);
+//				}else if(relation.getType().equals("Cast")){
+//					cast0.put(entity,relation);
+//				}else if(relation.getType().equals("Extend")){
+//					inherit0.put(entity,relation);
+//				}else if(relation.getType().equals("Implement")){
+//					implement0.put(entity,relation);
+//				}else if(relation.getType().equals("Return")){
+//					return0.put(entity,relation);
+//				}else if(relation.getType().equals("Import")){
+//					import0.put(entity,relation);
+//				}
+//			}
+//		}
+//	}
+
 }

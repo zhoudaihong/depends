@@ -1,9 +1,10 @@
 package depends.extractor.cpp;
 
+import org.eclipse.cdt.core.dom.ast.IASTPreprocessorMacroDefinition;
+import org.eclipse.cdt.core.dom.ast.IMacroBinding;
+
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.cdt.core.dom.ast.IMacroBinding;
-import org.eclipse.cdt.core.dom.ast.IASTPreprocessorMacroDefinition;
 
 public class MacroMemoryRepo extends MacroRepo{
 

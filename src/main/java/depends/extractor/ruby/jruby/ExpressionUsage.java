@@ -24,12 +24,9 @@ SOFTWARE.
 
 package depends.extractor.ruby.jruby;
 
-
-
 import depends.entity.ContainerEntity;
 import depends.entity.Expression;
 import depends.entity.FunctionEntity;
-
 import depends.entity.VarEntity;
 import depends.entity.repo.IdGenerator;
 import depends.extractor.ruby.RubyHandlerContext;
@@ -63,6 +60,7 @@ public class ExpressionUsage {
 		Expression parent = findParentInStack(ctx);
 		/* create expression and link it with parent */
 		expression = new Expression(idGenerator.generateId());
+		expression.setStartLine(ctx.getPosition().getStartLine());
 		expression.setText(ctx.toString());
 		expression.setParent(parent);
 		if (ctx instanceof NewlineNode) {

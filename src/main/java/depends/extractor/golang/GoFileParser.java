@@ -22,10 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package depends.extractor.java;
+package depends.extractor.golang;
 
-import java.io.IOException;
-
+import depends.entity.Entity;
+import depends.entity.FileEntity;
+import depends.entity.repo.EntityRepo;
+import depends.relations.Inferer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -34,20 +36,15 @@ import org.antlr.v4.runtime.atn.LexerATNSimulator;
 import org.antlr.v4.runtime.atn.ParserATNSimulator;
 import org.antlr.v4.runtime.atn.PredictionContextCache;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import depends.extractor.LocCalculator;
-import depends.entity.Entity;
-import depends.entity.FileEntity;
-import depends.entity.repo.EntityRepo;
-import depends.extractor.java.JavaLexer;
-import depends.extractor.java.JavaParser;
-import depends.relations.Inferer;
+
+import java.io.IOException;
 
 
-public class JavaFileParser implements depends.extractor.FileParser{
+public class GoFileParser implements depends.extractor.FileParser{
 	private String fileFullPath;
 	private EntityRepo entityRepo;
 	private Inferer inferer;
-	public JavaFileParser(String fileFullPath,EntityRepo entityRepo, Inferer inferer) {
+	public GoFileParser(String fileFullPath, EntityRepo entityRepo, Inferer inferer) {
         this.fileFullPath = fileFullPath;
         this.entityRepo = entityRepo;
         this.inferer = inferer;
@@ -56,21 +53,18 @@ public class JavaFileParser implements depends.extractor.FileParser{
 	@Override
 	public void parse() throws IOException {
         CharStream input = CharStreams.fromFileName(fileFullPath);
-        Lexer lexer = new JavaLexer(input);
+        Lexer lexer = new GoLexer(input);
         lexer.setInterpreter(new LexerATNSimulator(lexer, lexer.getATN(), lexer.getInterpreter().decisionToDFA, new PredictionContextCache()));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
-        JavaParser parser = new JavaParser(tokens);
+        GoParser parser = new GoParser(tokens);
         ParserATNSimulator interpreter = new ParserATNSimulator(parser, parser.getATN(), parser.getInterpreter().decisionToDFA, new PredictionContextCache());
         parser.setInterpreter(interpreter);
-        JavaListener bridge = new JavaListener(fileFullPath, entityRepo,inferer);
+        GoListener bridge = new GoListener(fileFullPath, entityRepo,inferer);
 	    ParseTreeWalker walker = new ParseTreeWalker();
 	    try {
-			JavaParser.CompilationUnitContext ctx = parser.compilationUnit();
-			walker.walk(bridge, ctx);
+	    	walker.walk(bridge, parser.sourceFile());
 			Entity fileEntity = entityRepo.getEntity(fileFullPath);
 			((FileEntity)fileEntity).cacheAllExpressions();
-			fileEntity.setEndLine(ctx.stop.getLine());
-			fileEntity.setLoc(LocCalculator.calcLoc(input.toString()));
 			interpreter.clearDFA();
 			bridge.done();
 	    }catch (Exception e) {
@@ -79,4 +73,5 @@ public class JavaFileParser implements depends.extractor.FileParser{
 	    }
 	    
     }
+	
 }

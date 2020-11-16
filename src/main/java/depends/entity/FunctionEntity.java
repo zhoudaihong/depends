@@ -146,8 +146,4 @@ public class FunctionEntity extends ContainerEntity{
 				expr.addDeducedTypeFunction(this);
 		}
 	}
-	
-	
-
-	
 }

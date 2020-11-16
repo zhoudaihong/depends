@@ -24,8 +24,6 @@ SOFTWARE.
 
 package depends.extractor.pom;
 
-
-
 import depends.entity.Expression;
 import depends.entity.GenericName;
 import depends.entity.VarEntity;

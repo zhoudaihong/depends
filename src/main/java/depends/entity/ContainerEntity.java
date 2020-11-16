@@ -24,8 +24,6 @@ SOFTWARE.
 
 package depends.entity;
 
-
-
 import depends.entity.repo.EntityRepo;
 import depends.relations.Inferer;
 import depends.relations.Relation;
@@ -460,6 +458,7 @@ public abstract class ContainerEntity extends DecoratedEntity {
 		expressionUseList.get(key).add(expression);
 		super.addRelation(relation);
 	}
+
 	private boolean linkedExpr(Expression a, Expression b) {
 		Expression parent = a.getParent();
 		while(parent!=null){

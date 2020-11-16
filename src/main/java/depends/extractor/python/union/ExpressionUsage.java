@@ -5,7 +5,6 @@ import depends.entity.repo.IdGenerator;
 import depends.extractor.HandlerContext;
 import depends.extractor.python.PythonHandlerContext;
 import depends.extractor.python.PythonParser.*;
-
 import depends.extractor.python.PythonParserBaseVisitor;
 import depends.relations.Inferer;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -15,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 public class ExpressionUsage {
 	HandlerContext context;
 	IdGenerator idGenerator;
@@ -31,7 +29,6 @@ public class ExpressionUsage {
 	 * Auto deduce variable type from assignment. for example: c = new C() then c is
 	 * type of C
 	 * 
-	 * @param node
 	 */
 	private void deduceVarTypeInCaseOfAssignment(Expr_stmtContext expr, Expression expression) {
 		List<String> names = getName(expr.testlist_star_expr());
@@ -68,6 +65,8 @@ public class ExpressionUsage {
 		}else {
 			/* create expression and link it with parent*/
 			expression = new Expression(idGenerator.generateId());
+			expression.setStartLine(ctx.getStart().getLine());
+
 			expression.setText(ctx.getText());
 			context.lastContainer().addExpression(ctx,expression);
 			expression.setParent(parent);
@@ -80,7 +79,7 @@ public class ExpressionUsage {
 				expression.setSet(true);
 				expression.setIdentifier(exprAssign.testlist_star_expr().getText());
 				if (isValidIdentifier(expression.getIdentifier())) {
-					makeSureVarExist(expression.getIdentifier());
+					makeSureVarExist(expression.getIdentifier(), ctx);
 				}
 				deduceVarTypeInCaseOfAssignment((Expr_stmtContext)ctx,expression);
 			}
@@ -105,9 +104,11 @@ public class ExpressionUsage {
 	}
 
 
-	private void makeSureVarExist(GenericName identifier) {
+	private void makeSureVarExist(GenericName identifier, ParserRuleContext ctx) {
 		if (null==context.foundEntityWithName(identifier)) {
-			context.foundVarDefinition(context.lastContainer(), identifier.getName());
+			VarEntity var = context.foundVarDefinition(context.lastContainer(), identifier.getName(),ctx.getStart().getLine());
+			var.setStartLine(ctx.getStart().getLine());
+
 		}
 	}
 
@@ -125,6 +126,7 @@ public class ExpressionUsage {
 		if (exprCtx.atom()!=null) {
 			//atom
 			Expression atomExpr = new Expression(idGenerator.generateId());
+			atomExpr.setStartLine(exprCtx.atom().getStart().getLine());
 			atomExpr.setParent(expression);
 			atomExpr.setText(exprCtx.atom().getText());
 			atomExpr.setIdentifier(exprCtx.atom().getText());
@@ -137,6 +139,7 @@ public class ExpressionUsage {
 				for (TrailerContext trailer:exprCtx.trailer()) {
 					if (trailer.name()!=null) {
 						Expression trailerExpr = new Expression(idGenerator.generateId());
+						trailerExpr.setStartLine(trailer.getStart().getLine());
 						trailerExpr.setText(trailer.getText());
 						context.lastContainer().addExpression(trailer,trailerExpr);
 						trailerExpr.setParent(expression);
@@ -146,7 +149,7 @@ public class ExpressionUsage {
 						trailerExpr.setIdentifier(trailer.name().getText());
 						if (trailer.arguments()!=null) {
 							if (trailer.arguments().OPEN_PAREN()!=null) {
-								foundCallStyleExpressionWithDot(trailerExpr,lastExpression.getIdentifier());
+								foundCallStyleExpressionWithDot(trailerExpr,lastExpression.getIdentifier(), trailer);
 							}else {
 								//subscript list, do nothing
 							}
@@ -157,7 +160,7 @@ public class ExpressionUsage {
 						//direct call, or direct data access
 						if (trailer.arguments()!=null) {
 							if (trailer.arguments().OPEN_PAREN()!=null) {
-								foundCallStyleExpressionWithoutDot(lastExpression);
+								foundCallStyleExpressionWithoutDot(lastExpression, trailer.arguments());
 							}else {
 								//subscript list, do nothing
 							}
@@ -195,7 +198,7 @@ public class ExpressionUsage {
 
 
 
-	private void foundCallStyleExpressionWithDot(Expression theExpression, GenericName varName) {
+	private void foundCallStyleExpressionWithDot(Expression theExpression, GenericName varName, ParserRuleContext ctx) {
 		GenericName funcName = theExpression.getIdentifier();
 		Entity prefixEntity = context.foundEntityWithName(varName);
 		if (prefixEntity instanceof VarEntity) {
@@ -213,7 +216,7 @@ public class ExpressionUsage {
 
 
 
-	private void foundCallStyleExpressionWithoutDot(Expression theExpression) {
+	private void foundCallStyleExpressionWithoutDot(Expression theExpression, ParserRuleContext ctx) {
 		GenericName funcName = theExpression.getIdentifier();
 		Entity typeEntity = context.foundEntityWithName(funcName);
 		if (typeEntity instanceof TypeEntity && typeEntity.getId() > 0) {

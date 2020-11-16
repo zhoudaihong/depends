@@ -131,11 +131,11 @@ public class RelationCounter {
 				}else {
 					Entity multiDeclare = repo.getEntity(referredEntity.getQualifiedName());
 					if (multiDeclare instanceof MultiDeclareEntities) {
-						MultiDeclareEntities m = (MultiDeclareEntities)multiDeclare;
-						List<Entity> entities = m.getEntities().stream().filter(item->(item instanceof FunctionEntityImpl))
+						MultiDeclareEntities m = (MultiDeclareEntities) multiDeclare;
+						List<Entity> entities = m.getEntities().stream().filter(item -> (item instanceof FunctionEntityImpl))
 								.collect(Collectors.toList());
-						for (Entity e:entities) {
-							entity.addRelation(expression,buildRelation(entity,DependencyType.IMPLLINK,e,expression.getLocation()));
+						for (Entity e : entities) {
+							entity.addRelation(expression, buildRelation(entity, DependencyType.IMPLLINK, e, expression.getLocation()));
 							matched = true;
 						}
 					}
@@ -163,12 +163,12 @@ public class RelationCounter {
 				if (entity.getAncestorOfType(FileEntity.class).getId().equals(referredEntity.getAncestorOfType(FileEntity.class).getId())){
 					entity.addRelation(buildRelation(entity,DependencyType.USE,referredEntity,expression.getLocation()));
 				}else {
-					MultiDeclareEntities m =  (MultiDeclareEntities)(repo.getEntity(referredEntity.getQualifiedName()));
-					for (Entity e:m.getEntities()) {
-						if (e==referredEntity) {
-							entity.addRelation(expression,buildRelation(entity,DependencyType.USE,e,expression.getLocation()));
-						}else {
-							entity.addRelation(expression,buildRelation(entity,DependencyType.IMPLLINK,e,expression.getLocation()));
+					MultiDeclareEntities m = (MultiDeclareEntities) (repo.getEntity(referredEntity.getQualifiedName()));
+					for (Entity e : m.getEntities()) {
+						if (e == referredEntity) {
+							entity.addRelation(expression, buildRelation(entity, DependencyType.USE, e, expression.getLocation()));
+						} else {
+							entity.addRelation(expression, buildRelation(entity, DependencyType.IMPLLINK, e, expression.getLocation()));
 						}
 						matched = true;
 					}

@@ -24,17 +24,19 @@ SOFTWARE.
 
 package depends.generator;
 
-import java.util.List;
-
 import depends.entity.Entity;
-import depends.entity.PackageNamePrefixRemover;
+import depends.entity.FileEntity;
+import depends.entity.EntityNameBuilder;
 import depends.entity.repo.EntityRepo;
-import multilang.depends.util.file.path.EmptyFilenameWritter;
-import multilang.depends.util.file.path.FilenameWritter;
 import depends.matrix.core.DependencyDetail;
 import depends.matrix.core.DependencyMatrix;
+import depends.matrix.core.LocationInfo;
+import multilang.depends.util.file.path.EmptyFilenameWritter;
+import multilang.depends.util.file.path.FilenameWritter;
 import multilang.depends.util.file.strip.EmptyLeadingNameStripper;
 import multilang.depends.util.file.strip.ILeadingNameStrippper;
+
+import java.util.List;
 
 public abstract class DependencyGenerator {
 	public abstract DependencyMatrix build(EntityRepo entityRepo,List<String> typeFilter);
@@ -48,21 +50,15 @@ public abstract class DependencyGenerator {
 	}
 	protected DependencyDetail buildDescription(Entity fromEntity, Entity toEntity, Integer fromLineNumber, Integer toLineNumber) {
 		if (!generateDetail) return null;
-		String srcName = PackageNamePrefixRemover.remove(fromEntity);
-		String destName = PackageNamePrefixRemover.remove(toEntity);
-		if (fromLineNumber!=null){
-			srcName += ":"+fromLineNumber;
-		}
-		if (toLineNumber!=null){
-			srcName += ":"+toLineNumber;
-		}
-		if (toEntity.getStartLine()!=null){
-			destName += ":"+toEntity.getStartLine();
-		}
-		if (toEntity.getEndLine()!=null){
-			destName += ":"+toEntity.getEndLine();
-		}
-		return new DependencyDetail(srcName,destName);
+		String fromObject = EntityNameBuilder.build(fromEntity);
+		String toObject = EntityNameBuilder.build(toEntity);
+
+		Entity fromFile = fromEntity.getAncestorOfType(FileEntity.class);
+		Entity toFile = toEntity.getAncestorOfType(FileEntity.class);
+
+		return new DependencyDetail(
+				new LocationInfo(fromObject,fromFile.getQualifiedName(),fromLineNumber, toLineNumber),
+				new LocationInfo(toObject,toFile.getQualifiedName(),toEntity.getStartLine(),toEntity.getEndLine()));
 	}
 	public void setFilenameRewritter(FilenameWritter filenameWritter) {
 		this.filenameWritter = filenameWritter;

@@ -109,16 +109,11 @@ public class CppVisitor  extends ASTVisitor {
 		if (notLocalFile(namespaceDefinition)) return ASTVisitor.PROCESS_SKIP;
 		String ns = namespaceDefinition.getName().toString().replace("::", ".");
 		logger.trace("enter ICPPASTNamespaceDefinition  " + ns);
-		Entity pkg = context.foundNamespace(ns);
-		setLineNumber(pkg, namespaceDefinition);
+		Entity pkg = context.foundNamespace(ns,namespaceDefinition.getFileLocation().getStartingLineNumber());
 		context.foundNewImport(new PackageWildCardImport(ns));
 		return super.visit(namespaceDefinition);
 	}
-	
-	private void setLineNumber(Entity entity, IASTNode node) {
-		entity.setStartLine(node.getFileLocation().getStartingLineNumber());
-		entity.setEndLine(node.getFileLocation().getEndingLineNumber());
-	}
+
 	@Override
 	public int leave(ICPPASTNamespaceDefinition namespaceDefinition) {
 		if (notLocalFile(namespaceDefinition)) return ASTVisitor.PROCESS_SKIP;
@@ -126,19 +121,16 @@ public class CppVisitor  extends ASTVisitor {
 		return super.leave(namespaceDefinition);
 	}
 
-	// Types (struct/class/enum)
+	// Types
 	@Override
 	public int visit(IASTDeclSpecifier declSpec) {
 		if (notLocalFile(declSpec)) return ASTVisitor.PROCESS_SKIP;
 		logger.trace("enter IASTDeclSpecifier  " + declSpec.getClass().getSimpleName());
-
 		if (declSpec instanceof IASTCompositeTypeSpecifier) {
 			IASTCompositeTypeSpecifier type = (IASTCompositeTypeSpecifier)declSpec;
 			String name = ASTStringUtilExt.getName(type);
 			List<GenericName> param = ASTStringUtilExt.getTemplateParameters(type);
-			//TypeEntity typeEntity = context.foundNewType(name);
-			TypeEntity typeEntity = context.foundNewType(name,declSpec.getFileLocation().getNodeOffset());
-			setLineNumber(typeEntity,type);
+			TypeEntity typeEntity = context.foundNewType(name, type.getFileLocation().getStartingLineNumber());
 			if (declSpec instanceof ICPPASTCompositeTypeSpecifier) {
 				ICPPASTBaseSpecifier[] baseSpecififers = ((ICPPASTCompositeTypeSpecifier)declSpec).getBaseSpecifiers();
 				for (ICPPASTBaseSpecifier baseSpecififer:baseSpecififers) {
@@ -148,8 +140,7 @@ public class CppVisitor  extends ASTVisitor {
 			}
 		}
 		else if (declSpec instanceof  IASTEnumerationSpecifier) {
-			TypeEntity typeEntity = context.foundNewType(ASTStringUtilExt.getName(declSpec),declSpec.getFileLocation().getNodeOffset());
-			setLineNumber(typeEntity,declSpec);
+			context.foundNewType(ASTStringUtilExt.getName(declSpec), declSpec.getFileLocation().getStartingLineNumber());
 		}else {
 			//we do not care other types
 		}
@@ -186,10 +177,7 @@ public class CppVisitor  extends ASTVisitor {
 					rawName = namedEntity.get(0).getQualifiedName();
 				}
 				returnType = reMapIfConstructDeconstruct(rawName,returnType);
-			
-				FunctionEntity methodDeclProto = context.foundMethodDeclaratorProto(rawName, returnType);
-			
-				setLineNumber(methodDeclProto,decl);
+				context.foundMethodDeclaratorProto(rawName, returnType,decl.getFileLocation().getStartingLineNumber());
 			}
 			else if ( declarator.getParent() instanceof IASTFunctionDefinition) {
 				IASTFunctionDefinition decl = (IASTFunctionDefinition)declarator.getParent();
@@ -200,10 +188,7 @@ public class CppVisitor  extends ASTVisitor {
 					rawName = namedEntity.get(0).getQualifiedName();
 				}
 				returnType = reMapIfConstructDeconstruct(rawName,returnType);
-//				context.foundMethodDeclaratorImplementation(rawName, returnType);
-				FunctionEntity methodDeclImpl = context.foundMethodDeclaratorImplementation(rawName, returnType);
-				setLineNumber(methodDeclImpl,decl);
-
+				context.foundMethodDeclaratorImplementation(rawName, returnType,decl.getFileLocation().getStartingLineNumber());
 			}
 		}
 		return super.visit(declarator);
@@ -278,14 +263,12 @@ public class CppVisitor  extends ASTVisitor {
 				IASTDeclSpecifier declSpecifier = ((IASTSimpleDeclaration) declaration).getDeclSpecifier();
 				//Found new typedef definition
 				if (declSpecifier.getStorageClass()==IASTDeclSpecifier.sc_typedef) {
-					//context.foundNewAlias(ASTStringUtilExt.getName(declarator),ASTStringUtilExt.getName(declSpecifier));
-					context.foundNewAlias(ASTStringUtilExt.getName(declarator),ASTStringUtilExt.getName(declSpecifier),declaration.getFileLocation().getNodeOffset());
+					context.foundNewAlias(ASTStringUtilExt.getName(declarator),ASTStringUtilExt.getName(declSpecifier));
 				}else if (!(declarator instanceof IASTFunctionDeclarator)) {
 					String varType = ASTStringUtilExt.getName(declSpecifier);
 					String varName = ASTStringUtilExt.getName(declarator);
 					if (!StringUtils.isEmpty(varType)) {
-						VarEntity var = context.foundVarDefinition(varName, GenericName.build(varType), ASTStringUtilExt.getTemplateParameters(declSpecifier));
-						setLineNumber(var,declarator);					
+						context.foundVarDefinition(varName, GenericName.build(varType), ASTStringUtilExt.getTemplateParameters(declSpecifier),declarator.getFileLocation().getStartingLineNumber());
 					}else {
 						expressionUsage.foundCallExpressionOfFunctionStyle(varName,declarator);
 					}
@@ -338,8 +321,7 @@ public class CppVisitor  extends ASTVisitor {
 	public int visit(IASTEnumerator enumerator) {
 		if (notLocalFile(enumerator)) return ASTVisitor.PROCESS_SKIP;
 		logger.trace("enter IASTEnumerator  " + enumerator.getClass().getSimpleName());
-		VarEntity var = context.foundVarDefinition(enumerator.getName().toString(), context.currentType().getRawName(), new ArrayList<>());
-		setLineNumber(var,enumerator);
+		VarEntity var = context.foundVarDefinition(enumerator.getName().toString(), context.currentType().getRawName(), new ArrayList<>(),enumerator.getFileLocation().getStartingLineNumber());
 		return super.visit(enumerator);
 	}
 	
@@ -361,7 +343,6 @@ public class CppVisitor  extends ASTVisitor {
 		String parameterType = ASTStringUtilExt.getName(parameterDeclaration.getDeclSpecifier());
 		if (context.currentFunction()!=null) {
 			VarEntity var = new VarEntity(GenericName.build(parameterName),GenericName.build(parameterType),context.currentFunction(),idGenerator.generateId());
-			setLineNumber(var,parameterDeclaration);
 			context.currentFunction().addParameter(var );
 		}else {
 			//System.out.println("** parameterDeclaration = " + parameter);

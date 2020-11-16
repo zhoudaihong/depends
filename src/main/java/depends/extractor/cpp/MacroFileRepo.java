@@ -1,13 +1,13 @@
 package depends.extractor.cpp;
+
 import depends.entity.repo.EntityRepo;
 import multilang.depends.util.file.TemporaryFile;
 import org.eclipse.cdt.core.dom.ast.IASTPreprocessorMacroDefinition;
 import org.eclipse.cdt.core.dom.ast.IMacroBinding;
-import java.io.*;
 
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
-
 
 public class MacroFileRepo extends MacroRepo{
 	private EntityRepo entityRepo;

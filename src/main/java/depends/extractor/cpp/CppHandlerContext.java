@@ -36,25 +36,28 @@ public class CppHandlerContext extends HandlerContext {
 		super(entityRepo,inferer);
 	}
 
-	public Entity foundNamespace(String nampespaceName) {
+	public Entity foundNamespace(String nampespaceName, int startingLineNumber) {
 		PackageEntity pkgEntity = new PackageEntity(nampespaceName, currentFile(),idGenerator.generateId());
+		pkgEntity.setStartLine(startingLineNumber);
 		entityRepo.add(pkgEntity);
 		entityStack.push(pkgEntity);
 		return pkgEntity;
 	}
 
-	public FunctionEntity foundMethodDeclaratorImplementation(String methodName, GenericName returnType){
+	public FunctionEntity foundMethodDeclaratorImplementation(String methodName, GenericName returnType, int startingLineNumber){
 		FunctionEntity functionEntity = new FunctionEntityImpl(GenericName.build(methodName), this.latestValidContainer(),
 				idGenerator.generateId(),returnType);
+		functionEntity.setStartLine(startingLineNumber);
 		entityRepo.add(functionEntity);
 		this.typeOrFileContainer().addFunction(functionEntity);
 		super.pushToStack(functionEntity);
 		return functionEntity;
 	}
 
-	public FunctionEntity foundMethodDeclaratorProto(String methodName, GenericName returnType){
+	public FunctionEntity foundMethodDeclaratorProto(String methodName, GenericName returnType, int startingLineNumber){
 		FunctionEntity functionEntity = new FunctionEntityProto(GenericName.build(methodName), this.latestValidContainer(),
 				idGenerator.generateId(),returnType);
+		functionEntity.setStartLine(startingLineNumber);
 		entityRepo.add(functionEntity);
 		this.typeOrFileContainer().addFunction(functionEntity);
 		super.pushToStack(functionEntity);
@@ -69,6 +72,4 @@ public class CppHandlerContext extends HandlerContext {
 		entityRepo.add(currentFileEntity);
 		return currentFileEntity;
 	}
-	
-	
 }

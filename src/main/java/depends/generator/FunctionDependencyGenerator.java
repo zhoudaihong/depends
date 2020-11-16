@@ -24,16 +24,16 @@ SOFTWARE.
 
 package depends.generator;
 
-import java.util.Iterator;
-import java.util.List;
-
 import depends.entity.Entity;
 import depends.entity.FileEntity;
 import depends.entity.FunctionEntity;
-import depends.entity.PackageNamePrefixRemover;
+import depends.entity.EntityNameBuilder;
 import depends.entity.repo.EntityRepo;
 import depends.matrix.core.DependencyMatrix;
 import depends.relations.Relation;
+
+import java.util.Iterator;
+import java.util.List;
 
 public class FunctionDependencyGenerator extends DependencyGenerator {
 	public DependencyMatrix build(EntityRepo entityRepo,List<String> typeFilter) {
@@ -69,7 +69,7 @@ public class FunctionDependencyGenerator extends DependencyGenerator {
 		FileEntity file = (FileEntity) entity.getAncestorOfType(FileEntity.class);
 		String name = stripper.stripFilename(file.getRawName().uniqName());
 		name = filenameWritter.reWrite(name);
-		String functionName = PackageNamePrefixRemover.remove(entity);
+		String functionName = EntityNameBuilder.build(entity);
 		name = name + "("+functionName+")";
 		return name;
 	}

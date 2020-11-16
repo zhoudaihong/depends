@@ -1,12 +1,13 @@
 ###总结：
-####1、实体行数计算上不止计算其实行数还计算了终止行数以及有效行数
+####1、实体行数计算上不止计算真实行数还计算了终止行数以及有效行数
 ####2、VarEntity增加类型名属性
 ####3、支持分析时排除部分文件或文件夹
 ####4、分析C++项目时分析所有头文件
+####5、为了处理分析java项目时出现的MultiDeclareEntities的各种问题，引入了新的关系计算类MyRelationCounter
 
 
 ###部分代码：
-#####1、VarEntity类新增变量typeIdentifier变量，为变量实体增加类型名属性；在FprmalParameterListContextHelper类内增加遍历设置VarEntity的方法
+#####1、VarEntity类新增变量typeIdentifier变量，为变量实体增加类型名属性；在FormalParameterListContextHelper类内增加遍历设置VarEntity的方法
 ```java
     private String typeIdentifier;
 ```   
