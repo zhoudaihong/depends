@@ -205,11 +205,18 @@ public class MyRelationCounter {
             return;
         }
         if(referredEntity instanceof MultiDeclareEntities){
-            List<Entity> resolvedMulti = MultiDeclareResolve.selectMostRelative((MultiDeclareEntities) referredEntity,from);
-            for(Entity e : resolvedMulti){
-                from.addRelation(new Relation(type, e ,e.getLocation()));
+            if(((MultiDeclareEntities) referredEntity).getEntities().get(0) instanceof FunctionEntity && type.equals("Import")) {
+                List<Entity> resolvedMulti = MultiDeclareResolve.selectMostRelative((MultiDeclareEntities) referredEntity, from);
+                for (Entity e : resolvedMulti) {
+                    from.addRelation(new Relation(type, e, location));
+                }
+                return;
+            }else{
+                List<Entity> resolvedMulti = MultiDeclareResolve.selectMostRelative((MultiDeclareEntities)referredEntity,from);
+                from.addRelation(new Relation(type, resolvedMulti.get(0) ,location));
+                return ;
             }
-            return ;
+
         }else if(referredEntity != null && referredEntity.getMutliDeclare() != null){
             List<Entity> resolvedMulti = MultiDeclareResolve.selectMostRelative(referredEntity.getMutliDeclare(),from);
             if(!resolvedMulti.contains(referredEntity)){
@@ -236,18 +243,24 @@ public class MyRelationCounter {
             ((ContainerEntity)from).addRelation(expression,new Relation(type, referredEntity, location));
             return;
         }
-        if(referredEntity instanceof MultiDeclareEntities){
-            List<Entity> resolvedMulti = MultiDeclareResolve.selectMostRelative((MultiDeclareEntities) referredEntity,from);
-            for(Entity e : resolvedMulti){
-                ((ContainerEntity)from).addRelation(expression,new Relation(type, e ,e.getLocation()));
+        if(referredEntity instanceof MultiDeclareEntities ){
+            if(((MultiDeclareEntities) referredEntity).getEntities().get(0) instanceof FunctionEntity && type.equals("Import")){
+                List<Entity> resolvedMulti = MultiDeclareResolve.selectMostRelative((MultiDeclareEntities) referredEntity,from);
+                for(Entity e : resolvedMulti){
+                    ((ContainerEntity)from).addRelation(expression,new Relation(type, e ,location));
+                }
+                return ;
+            }else{
+                List<Entity> resolvedMulti = MultiDeclareResolve.selectMostRelative((MultiDeclareEntities)referredEntity,from);
+                ((ContainerEntity)from).addRelation(expression,new Relation(type, resolvedMulti.get(0) ,location));
+                return ;
             }
-            return ;
         }else if(referredEntity != null && referredEntity.getMutliDeclare() != null){
             List<Entity> resolvedMulti = MultiDeclareResolve.selectMostRelative(referredEntity.getMutliDeclare(),from);
             if(!resolvedMulti.contains(referredEntity)){
-                ((ContainerEntity)from).addRelation(expression,new Relation(type, resolvedMulti.get(0) ,resolvedMulti.get(0).getLocation()));
+                ((ContainerEntity)from).addRelation(expression,new Relation(type, resolvedMulti.get(0) ,location));
             }else{
-                ((ContainerEntity)from).addRelation(expression,new Relation(type, referredEntity ,referredEntity.getLocation()));
+                ((ContainerEntity)from).addRelation(expression,new Relation(type, referredEntity ,location));
             }
             return ;
         }
