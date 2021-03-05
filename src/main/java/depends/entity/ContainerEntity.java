@@ -25,6 +25,7 @@ SOFTWARE.
 package depends.entity;
 
 import depends.entity.repo.EntityRepo;
+import depends.extractor.java.PathConverter;
 import depends.relations.Inferer;
 import depends.relations.Relation;
 import multilang.depends.util.file.TemporaryFile;
@@ -172,9 +173,22 @@ public abstract class ContainerEntity extends DecoratedEntity {
 		
 		if (expressionList==null) return;
 		if(expressionList.size()>10000) return;
-		
+
+		List<Expression> unsolvedCalls = new ArrayList<>();
 		
 		for (Expression expression : expressionList) {
+			if(expression.isCall()){
+				int count = 0;
+				List<Expression> children = expression.getChildren();
+				for(Expression child : children){
+					if(child.id == expression.getDeduceTypeBasedId()){
+						count++;
+					}
+				}
+				if(count != 1 && children.size() != 0){
+					System.out.println(123);
+				}
+			}
 			// 1. if expression's type existed, break;
 			if (expression.getType() != null)
 				continue;
@@ -187,6 +201,9 @@ public abstract class ContainerEntity extends DecoratedEntity {
 			// 2. if expression's rawType existed, directly infer type by rawType
 			// if expression's rawType does not existed, infer type based on identifiers
 			if (expression.getRawType() != null) {
+				if(expression.isCall() && !expression.isCreate()){
+					System.out.println(123);
+				}
 				expression.setType(inferer.inferTypeFromName(this, expression.getRawType()), null, inferer);
 				if (expression.getType() != null) {
 					continue;
@@ -201,6 +218,7 @@ public abstract class ContainerEntity extends DecoratedEntity {
 				
 				
 				Entity entity = inferer.resolveName(this, expression.getIdentifier(), true);
+
 				String composedName = expression.getIdentifier().toString();
 				Expression theExpr = expression;
 				if (entity==null) {
@@ -214,7 +232,23 @@ public abstract class ContainerEntity extends DecoratedEntity {
 					}
 				}
 				if (entity != null) {
+
+					if(expression.isCall() && entity.getClass() == VarEntity.class){
+						entity = PathConverter.solveWrongEntityInSameNameByType(entity, FunctionEntity.class);
+					}else if(!expression.isCall() && entity.getClass() == FunctionEntity.class){
+						entity = PathConverter.solveWrongEntityInSameNameByType(entity, VarEntity.class);
+					}
 					expression.setType(entity.getType(), entity, inferer);
+
+					if(expression.isCall()){
+						Entity preReferred = expression.getReferredEntity();
+						if(preReferred.getMutliDeclare() != null && preReferred.getClass() == FunctionEntity.class){
+							if(expression.getChildren().size() > 1){
+								unsolvedCalls.add(expression);
+							}
+						}
+					}
+
 					continue;
 				}
 				if (expression.isCall()) {
@@ -229,6 +263,49 @@ public abstract class ContainerEntity extends DecoratedEntity {
 					Entity varEntity = this.lookupVarInVisibleScope(expression.getIdentifier());
 					if (varEntity != null) {
 						expression.setType(varEntity.getType(), varEntity, inferer);
+					}
+				}
+			}
+		}
+		//解决可能的重载CALL
+		if(unsolvedCalls.size() > 0){
+			for(Expression unsolvedCall : unsolvedCalls){
+				Entity prereferred = unsolvedCall.getReferredEntity();
+				int deduceId = unsolvedCall.getDeduceTypeBasedId();
+				List<TypeEntity> trueTypes = new ArrayList<>();
+				if(unsolvedCall.isDot()){
+					for(Expression child : unsolvedCall.getChildren()){
+						if(child.id != deduceId){
+							trueTypes.add(child.getType());
+						}
+					}
+				}else{
+					for(Expression child : unsolvedCall.getChildren()){
+							trueTypes.add(child.getType());
+						}
+				}
+				//根据参数类型寻找重载方法中合适的方法（基本类型由于都是built-in类型所以无法区分）
+				for(Entity entity : prereferred.getMutliDeclare().getEntities()){
+					if(entity.getClass() == FunctionEntity.class){
+						Collection<VarEntity> parameters = ((FunctionEntity) entity).getParameters();
+						if(parameters.size() != trueTypes.size()) break;
+						int numOfCorrectType = 0;
+						//参数匹配
+						for(TypeEntity trueType : trueTypes){
+							Iterator<VarEntity> parametersIt = parameters.iterator();
+							while(parametersIt.hasNext()){
+								VarEntity parameter = parametersIt.next();
+								if(trueType == parameter.getType()){
+									numOfCorrectType++;
+									parametersIt.remove();
+									break;
+								}
+							}
+							if(numOfCorrectType == trueTypes.size()) break;
+						}
+						if(numOfCorrectType == trueTypes.size()){
+							unsolvedCall.setType(entity.getType(), entity, inferer);
+						}
 					}
 				}
 			}

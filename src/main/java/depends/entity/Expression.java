@@ -52,6 +52,10 @@ public class Expression implements Serializable{
     									//they will not be treat as real expressions in case of relation calculation
 	private boolean deriveTypeFromChild = true;
 
+	public Integer getDeduceTypeBasedId() {
+		return deduceTypeBasedId;
+	}
+
 	private Integer deduceTypeBasedId; //by default, parent expression type determined by most left child
 
 	private Integer parentId = -1; 
@@ -68,6 +72,7 @@ public class Expression implements Serializable{
 	
 	private transient TypeEntity type; // the type we care - for relation calculation. 
 	private Location location = new Location();
+
     //for leaf, it equals to referredEntity.getType. otherwise, depends on child's type strategy
 	
 	/*
@@ -264,6 +269,10 @@ public class Expression implements Serializable{
 		}
 	}
 
+	public void addChild(Expression expression) {
+		this.children.add(expression);
+	}
+
 
 	public GenericName getIdentifier() {
 		return this.identifier;
@@ -429,4 +438,10 @@ public class Expression implements Serializable{
 	public Location getLocation() {
 		return location;
 	}
+
+
+
+	private List<Expression> children = new ArrayList<>();
+
+	public List<Expression> getChildren(){ return this.children; }
 }

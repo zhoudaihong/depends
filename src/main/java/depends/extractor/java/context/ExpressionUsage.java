@@ -49,6 +49,9 @@ public class ExpressionUsage {
 		context.lastContainer().addExpression(ctx,expression);
 
 		expression.setParent(parent);
+		if(parent != null){
+			parent.addChild(expression);
+		}
 
 		
 		if (ctx.primary()!=null) {

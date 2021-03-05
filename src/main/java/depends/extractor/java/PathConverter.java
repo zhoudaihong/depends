@@ -1,6 +1,14 @@
 package depends.extractor.java;
 
+import depends.entity.Entity;
+import depends.entity.GenericName;
+import depends.entity.MultiDeclareEntities;
+
+import java.util.HashSet;
+import java.util.List;
+
 public class PathConverter {
+
     public static String File2Package(String filePath,String packageName){
         String result = null;
         String tempPackagePath;
@@ -22,7 +30,36 @@ public class PathConverter {
         if(filePath.lastIndexOf(tempPackagePath) != -1){
             result = filePath.substring(0,filePath.lastIndexOf(tempPackagePath) + tempPackagePath.length());
         }
+
+        if(result == null)  result = "";
+
         return result;
+
+    }
+
+    public static Entity solveWrongEntityInSameNameByType(Entity fromEntity, Class clas){
+        Entity preReferred = fromEntity;
+        while(true){
+
+            MultiDeclareEntities multiDeclareEntities = fromEntity.getMutliDeclare();
+            if(multiDeclareEntities != null){
+                List<Entity> multi = multiDeclareEntities.getEntities();
+                for(Entity entity : multi){
+                    if(entity.getClass() == clas){
+                        return entity;
+                    }
+                }
+            }
+
+            String preName = fromEntity.getRawName().getName();
+            fromEntity = fromEntity.getParent();
+            if(fromEntity == null) return preReferred;
+
+            Entity possibleEntity = fromEntity.getByName(preName, new HashSet<>());
+            if(possibleEntity != null && possibleEntity.getClass() == clas) {
+                return possibleEntity;
+            }
+        }
     }
 
 }
