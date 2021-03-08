@@ -38,7 +38,10 @@ public class PathConverter {
     }
 
     public static Entity solveWrongEntityInSameNameByType(Entity fromEntity, Class clas){
+
         Entity preReferred = fromEntity;
+        String preName = fromEntity.getRawName().getName();
+
         while(true){
 
             MultiDeclareEntities multiDeclareEntities = fromEntity.getMutliDeclare();
@@ -51,7 +54,6 @@ public class PathConverter {
                 }
             }
 
-            String preName = fromEntity.getRawName().getName();
             fromEntity = fromEntity.getParent();
             if(fromEntity == null) return preReferred;
 
