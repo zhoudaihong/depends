@@ -178,6 +178,7 @@ public abstract class ContainerEntity extends DecoratedEntity {
 		
 		for (Expression expression : expressionList) {
 
+
 			// 1. if expression's type existed, break;
 			if (expression.getType() != null)
 				continue;
@@ -217,26 +218,21 @@ public abstract class ContainerEntity extends DecoratedEntity {
 							break;
 					}
 				}
-				if (entity != null) {
 
+				if(entity != null){
 					if(expression.isCall() && entity.getClass() == VarEntity.class){
 						entity = PathConverter.solveWrongEntityInSameNameByType(entity, FunctionEntity.class);
 					}else if(!expression.isCall() && entity.getClass() == FunctionEntity.class){
+						Entity preReferred = entity;
 						entity = PathConverter.solveWrongEntityInSameNameByType(entity, VarEntity.class);
-					}
-
-					expression.setType(entity.getType(), entity, inferer);
-
-					if(expression.isCall()){
-						Entity preReferred = expression.getReferredEntity();
-						if(preReferred.getMutliDeclare() != null && preReferred.getClass() == FunctionEntity.class){
-							if((expression.isDot() && expression.getChildren().size() > 1) ||
-									(!expression.isDot() && expression.getChildren().size() > 0)){
-								unsolvedCalls.add(expression);
-							}
+						if(entity == null){
+							entity = PathConverter.solveWrongEntityInSameNameByType(preReferred, TypeEntity.class);
 						}
 					}
+				}
 
+				if (entity != null) {
+					expression.setType(entity.getType(), entity, inferer);
 					continue;
 				}
 				if (expression.isCall()) {
@@ -256,6 +252,20 @@ public abstract class ContainerEntity extends DecoratedEntity {
 			}
 		}
 		//解决可能的重载CALL
+
+		for(Expression expression : expressionList){
+			if(expression.isCall()){
+				Entity preReferred = expression.getReferredEntity();
+				if(preReferred != null){
+					if(preReferred.getMutliDeclare() != null && preReferred.getClass() == FunctionEntity.class){
+						if((expression.isDot() && expression.getChildren().size() > 1) ||
+								(!expression.isDot() && expression.getChildren().size() > 0)){
+							unsolvedCalls.add(expression);
+						}
+					}
+				}
+			}
+		}
 		if(unsolvedCalls.size() > 0){
 			for(Expression unsolvedCall : unsolvedCalls){
 				Entity prereferred = unsolvedCall.getReferredEntity();

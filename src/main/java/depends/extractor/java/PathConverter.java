@@ -39,28 +39,25 @@ public class PathConverter {
 
     public static Entity solveWrongEntityInSameNameByType(Entity fromEntity, Class clas){
 
-        Entity preReferred = fromEntity;
         String preName = fromEntity.getRawName().getName();
 
         while(true){
+            if(fromEntity == null) return null;
 
-            MultiDeclareEntities multiDeclareEntities = fromEntity.getMutliDeclare();
-            if(multiDeclareEntities != null){
-                List<Entity> multi = multiDeclareEntities.getEntities();
-                for(Entity entity : multi){
-                    if(entity.getClass() == clas){
-                        return entity;
+            Entity possibleEntity = fromEntity.getByName(preName, new HashSet<>());
+            if(possibleEntity != null) {
+                if(possibleEntity.getClass() == clas) return possibleEntity;
+                MultiDeclareEntities multiDeclareEntities = possibleEntity.getMutliDeclare();
+                if(multiDeclareEntities != null){
+                    List<Entity> multi = multiDeclareEntities.getEntities();
+                    for(Entity entity : multi){
+                        if(entity.getClass() == clas){
+                            return entity;
+                        }
                     }
                 }
             }
-
             fromEntity = fromEntity.getParent();
-            if(fromEntity == null) return preReferred;
-
-            Entity possibleEntity = fromEntity.getByName(preName, new HashSet<>());
-            if(possibleEntity != null && possibleEntity.getClass() == clas) {
-                return possibleEntity;
-            }
         }
     }
 
