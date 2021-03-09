@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
+import depends.extractor.java.PathConverter;
 import depends.relations.Inferer;
 
 public class TypeEntity extends ContainerEntity {
@@ -55,6 +56,9 @@ public class TypeEntity extends ContainerEntity {
 		Collection<Entity> r = identiferToEntities(inferer, this.inhertedTypeIdentifiers);
 		if (r!=null) {
 			r.forEach(item -> {
+				if(item instanceof FunctionEntity){
+					item = PathConverter.solveWrongEntityInSameNameByType(item, TypeEntity.class);
+				}
 				Entity typeItem = getTypeEntity(item);
 				if (typeItem !=null) {
 					inheritedTypes.add((TypeEntity) typeItem);
@@ -69,6 +73,9 @@ public class TypeEntity extends ContainerEntity {
 		r = identiferToEntities(inferer, this.implementedIdentifiers);
 		if (r!=null) {
 				r.forEach(item -> {
+					if(item instanceof FunctionEntity){
+						item = PathConverter.solveWrongEntityInSameNameByType(item, TypeEntity.class);
+					}
 					Entity typeItem = getTypeEntity(item);
 					if (typeItem !=null) {
 						implementedTypes.add((TypeEntity) typeItem);
