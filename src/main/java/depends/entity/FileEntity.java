@@ -170,4 +170,35 @@ public class FileEntity extends TypeEntity {
 		}
 	}
 
+	public String file2Package(String packageName){
+		String result = null;
+		String tempPackagePath;
+		String filePath = getQualifiedName();
+		if(filePath.contains("/")){
+			tempPackagePath = packageName.replace('.','/');
+		}else{
+			tempPackagePath = packageName.replace('.','\\');
+		}
+		int numOfSpace = 0;
+		for(int i = 0;i < tempPackagePath.length();i++){
+			if(tempPackagePath.charAt(i) == ' '){
+				numOfSpace++;
+			}else{
+				break;
+			}
+		}
+		tempPackagePath = tempPackagePath.substring(numOfSpace);
+
+		if(filePath.lastIndexOf(tempPackagePath) != -1){
+			result = filePath.substring(0,filePath.lastIndexOf(tempPackagePath) + tempPackagePath.length());
+		}
+
+		if(result == null){
+			result = "";
+		}
+
+		return result;
+
+	}
+
 }

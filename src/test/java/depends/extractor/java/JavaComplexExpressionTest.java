@@ -16,7 +16,7 @@ public class JavaComplexExpressionTest extends JavaParserTest {
 	}
 	@Test
 	public void test_complexExpression() throws IOException {
-        String src = "./src/test/resources/java-code-examples/ComplexExpressionTest.java";
+        String src = "./src/test/resources/java-code-examples/ComplexExpressionExample.java";
         JavaFileParser parser = createParser(src);
         parser.parse();
         inferer.resolveAllBindings();

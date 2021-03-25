@@ -39,34 +39,33 @@ public class JavaHandlerContext extends HandlerContext {
 
 	public Entity foundNewPackage(String packageName) {
 		Entity pkgEntity = entityRepo.getEntity(packageName);
+		String pckAbstractPath = currentFileEntity.file2Package(packageName);
 		if (pkgEntity == null) {
-			pkgEntity = new PackageEntity(packageName, idGenerator.generateId());
-			((PackageEntity)pkgEntity).setJavaPath(PathConverter.File2Package(currentFileEntity.getQualifiedName(),packageName));
-			entityRepo.add(pkgEntity);
+			createNewPckWithJavaPath(packageName, pckAbstractPath);
 		}else{
 			if(pkgEntity instanceof MultiDeclareEntities){
 				boolean findFlag = false;
 				for(Entity e : ((MultiDeclareEntities) pkgEntity).getEntities()){
-					if(PathConverter.File2Package(currentFileEntity.getQualifiedName(),packageName).equals(((PackageEntity)e).getJavaPath())){
+					if(pckAbstractPath.equals(((PackageEntity)e).getJavaPath())){
 						pkgEntity = e;
 						findFlag = true;
 						break;
 					}
 				}if(!findFlag){
-					pkgEntity = new PackageEntity(packageName, idGenerator.generateId());
-					((PackageEntity)pkgEntity).setJavaPath(PathConverter.File2Package(currentFileEntity.getQualifiedName(),packageName));
-					entityRepo.add(pkgEntity);
+					createNewPckWithJavaPath(packageName, pckAbstractPath);
 				}
-			}else if( !((PathConverter.File2Package(currentFileEntity.getQualifiedName(),packageName)).equals(((PackageEntity)pkgEntity).getJavaPath())) ){
-				pkgEntity = new PackageEntity(packageName, idGenerator.generateId());
-				((PackageEntity)pkgEntity).setJavaPath(PathConverter.File2Package(currentFileEntity.getQualifiedName(),packageName));
-				entityRepo.add(pkgEntity);
+			}else if( !(pckAbstractPath.equals(((PackageEntity)pkgEntity).getJavaPath())) ){
+				createNewPckWithJavaPath(packageName, pckAbstractPath);
 			}
 		}
 		Entity.setParent(currentFileEntity,pkgEntity);
 		return pkgEntity;
 	}
 
-
-
+	private Entity createNewPckWithJavaPath(String packageName, String path){
+		Entity pkgEntity = new PackageEntity(packageName, idGenerator.generateId());
+		((PackageEntity)pkgEntity).setJavaPath(path);
+		entityRepo.add(pkgEntity);
+		return pkgEntity;
+	}
 }
