@@ -41,7 +41,7 @@ public class JavaHandlerContext extends HandlerContext {
 		Entity pkgEntity = entityRepo.getEntity(packageName);
 		String pckAbstractPath = currentFileEntity.file2Package(packageName);
 		if (pkgEntity == null) {
-			createNewPckWithJavaPath(packageName, pckAbstractPath);
+			pkgEntity = createNewPckWithJavaPath(packageName, pckAbstractPath);
 		}else{
 			if(pkgEntity instanceof MultiDeclareEntities){
 				boolean findFlag = false;
@@ -52,10 +52,10 @@ public class JavaHandlerContext extends HandlerContext {
 						break;
 					}
 				}if(!findFlag){
-					createNewPckWithJavaPath(packageName, pckAbstractPath);
+					pkgEntity = createNewPckWithJavaPath(packageName, pckAbstractPath);
 				}
 			}else if( !(pckAbstractPath.equals(((PackageEntity)pkgEntity).getJavaPath())) ){
-				createNewPckWithJavaPath(packageName, pckAbstractPath);
+				pkgEntity = createNewPckWithJavaPath(packageName, pckAbstractPath);
 			}
 		}
 		Entity.setParent(currentFileEntity,pkgEntity);
