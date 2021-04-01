@@ -42,7 +42,7 @@ class TemplateParameterASTVisitor extends ASTVisitor{
 				} else if (argument instanceof IASTLiteralExpression){
 					parameters.add(GenericName.build("<Literal>"));
 				}else {
-					System.err.println ("TODO: unknown template arguments");
+					//System.err.println ("TODO: unknown template arguments");
 				}
 			}		}
 		return super.visit(name);

@@ -25,13 +25,9 @@ SOFTWARE.
 package depends.extractor;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.codehaus.plexus.util.FileUtils;
 import org.slf4j.Logger;
@@ -134,8 +130,8 @@ abstract public class AbstractLangProcessor {
 			System.gc();
 			logger.info("Heap Information: " + ManagementFactory.getMemoryMXBean().getHeapMemoryUsage());
 		}
-//		identifyDependencies();
-//		String path = "D:\\FDSE\\output.txt";
+//		//identifyDependencies();
+//		String path = "D:\\FDSE\\dependsData\\output-old.txt";
 //		File file = new File(path);
 //		//如果文件不存在，则自动生成文件；
 //		if(!file.exists()){
@@ -173,6 +169,7 @@ abstract public class AbstractLangProcessor {
 	}
 
 	private void markAllEntitiesScope() {
+		logger.info("Start Marking ALL Entities'Scope...");
 		entityRepo.getFileEntities().stream().forEach(entity -> {
 			Entity file = entity.getAncestorOfType(FileEntity.class);
 			try {
@@ -183,6 +180,7 @@ abstract public class AbstractLangProcessor {
 
 			}
 		});
+		logger.info("Mark ALL Entities'Scope Successfully...");
 	}
 
 	/**
@@ -236,8 +234,7 @@ abstract public class AbstractLangProcessor {
 			parseFile(f);
 		}
 
-//		System.out.println("all files procceed successfully...");
-
+		System.out.println("all files procceed successfully...");
 	}
 
 	protected void parseFile(String fileFullPath) {

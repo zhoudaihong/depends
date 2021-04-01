@@ -57,13 +57,15 @@ public class TypeEntity extends ContainerEntity {
 		if (r!=null) {
 			r.forEach(item -> {
 				if(item instanceof FunctionEntity){
-					item = PathConverter.solveWrongEntityInSameNameByType(item, TypeEntity.class);
+					if(PathConverter.solveWrongEntityInSameNameByType(item, TypeEntity.class) != null){
+						item = PathConverter.solveWrongEntityInSameNameByType(item, TypeEntity.class);
+					}
 				}
 				Entity typeItem = getTypeEntity(item);
 				if (typeItem !=null) {
 					inheritedTypes.add((TypeEntity) typeItem);
 				}else {
-					System.err.println(item.getRawName() + " expected a type, but actually it is "+ item.getClass().getSimpleName());
+					//System.err.println(item.getRawName() + " expected a type, but actually it is "+ item.getClass().getSimpleName());
 				}
 			});
 		}
