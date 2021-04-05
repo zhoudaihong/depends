@@ -89,7 +89,7 @@
         <dependency>
             <groupId>eclipse-photon</groupId>
             <artifactId>org.eclipse.core.resources</artifactId>
-            <version>3.14.0.v20210215-0934</version>
+            <version>3.13.700.v20200209-1624</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -128,37 +128,37 @@
         <dependency>
             <groupId>org.eclipse.cdt</groupId>
             <artifactId>cdt-core</artifactId>
-            <version>7.2.0.202102251239</version>
+            <version>6.11.0.202003081657</version>
         </dependency>
         <dependency>
             <groupId>eclipse-photon</groupId>
             <artifactId>org.eclipse.equinox.registry</artifactId>
-            <version>3.10.100.v20210212-1143</version>
+            <version>3.8.700.v20200121-1457</version>
         </dependency>
         <dependency>
             <groupId>eclipse-photon</groupId>
             <artifactId>org.eclipse.core.runtime</artifactId>
-            <version>3.20.100.v20210111-0815</version>
+            <version>3.17.100.v20200203-0917</version>
         </dependency>
         <dependency>
             <groupId>eclipse-photon</groupId>
             <artifactId>org.eclipse.equinox.common</artifactId>
-            <version>3.14.100.v20210212-1143</version>
+            <version>3.11.0.v20200206-0817</version>
         </dependency>
         <dependency>
             <groupId>eclipse-photon</groupId>
             <artifactId>org.eclipse.osgi</artifactId>
-            <version>3.16.200.v20210226-1447</version>
+            <version>3.15.200.v20200214-1600</version>
         </dependency>
         <dependency>
             <groupId>eclipse-photon</groupId>
             <artifactId>org.eclipse.equinox.preferences</artifactId>
-            <version>3.8.200.v20210212-1143</version>
+            <version>3.7.700.v20191213-1901</version>
         </dependency>
         <dependency>
             <groupId>eclipse-photon</groupId>
             <artifactId>org.eclipse.core.jobs</artifactId>
-            <version>3.10.1100.v20210111-0815</version>
+            <version>3.10.700.v20200106-1020</version>
         </dependency>
         <dependency>
             <groupId>info.picocli</groupId>
