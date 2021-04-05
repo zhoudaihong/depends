@@ -50,8 +50,17 @@ public class RelationCounter {
 	}
 	
 	public void computeRelations() {
-		entities.forEach(entity->
-		computeRelationOf(entity));
+		int index = 0;
+		int allEntitiesNum = entities.size();
+		for(Entity entity : entities){
+			computeRelationOf(entity);
+			index++;
+			try{
+				System.out.print("\rNumber Of Binding-resolved files:[" + index + "/" + allEntitiesNum + "]");
+				Thread.sleep(20);
+			}catch(InterruptedException e){}
+		}
+		System.out.println();
 	}
 
 	private void computeRelationOf(Entity entity) {

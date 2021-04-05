@@ -25,6 +25,7 @@ SOFTWARE.
 package depends.entity;
 
 import depends.entity.repo.EntityRepo;
+import depends.extractor.java.JavaBuiltInType;
 import depends.extractor.java.PathConverter;
 import depends.relations.Inferer;
 import depends.relations.Relation;
@@ -166,16 +167,95 @@ public abstract class ContainerEntity extends DecoratedEntity {
 	 * @param inferer
 	 */
 	public void resolveExpressions(Inferer inferer) {
-		
+
+		if(inferer.getBuildInTypeManager() instanceof JavaBuiltInType){
+			resolveJavaExpressions(inferer);
+		}else{
+			resolveOtherExpressions(inferer);
+		}
+	}
+
+	private void resolveOtherExpressions(Inferer inferer){
+
 		if (this instanceof FunctionEntity) {
 			((FunctionEntity)this).linkReturnToLastExpression();
 		}
-		
+
+		if (expressionList==null) return;
+		if(expressionList.size()>10000) return;
+
+
+		for (Expression expression : expressionList) {
+			// 1. if expression's type existed, break;
+			if (expression.getType() != null)
+				continue;
+			if (expression.isDot()) { // wait for previous
+				continue;
+			}
+			if (expression.getRawType() == null && expression.getIdentifier() == null)
+				continue;
+
+			// 2. if expression's rawType existed, directly infer type by rawType
+			// if expression's rawType does not existed, infer type based on identifiers
+			if (expression.getRawType() != null) {
+				expression.setType(inferer.inferTypeFromName(this, expression.getRawType()), null, inferer);
+				if (expression.getType() != null) {
+					continue;
+				}
+			}
+			if (expression.getIdentifier() != null) {
+
+//				if (this.getAncestorOfType(FileEntity.class).getRawName().contains("/examples/usersession/server.py") &&
+//						expression.getIdentifier().contains("config")) {
+//					System.out.print("dd");
+//				}
+
+
+				Entity entity = inferer.resolveName(this, expression.getIdentifier(), true);
+				String composedName = expression.getIdentifier().toString();
+				Expression theExpr = expression;
+				if (entity==null) {
+					while(theExpr.getParent()!=null && theExpr.getParent().isDot()) {
+						theExpr = theExpr.getParent();
+						if (theExpr.getIdentifier()==null) break;
+						composedName = composedName + "." + theExpr.getIdentifier().toString();
+						entity = inferer.resolveName(this, GenericName.build(composedName), true);
+						if (entity!=null)
+							break;
+					}
+				}
+				if (entity != null) {
+					expression.setType(entity.getType(), entity, inferer);
+					continue;
+				}
+				if (expression.isCall()) {
+					List<Entity> funcs = this.lookupFunctionInVisibleScope(expression.getIdentifier());
+					if (funcs != null) {
+						for (Entity func:funcs) {
+							expression.setType(func.getType(), func, inferer);
+						}
+					}
+				} else {
+
+					Entity varEntity = this.lookupVarInVisibleScope(expression.getIdentifier());
+					if (varEntity != null) {
+						expression.setType(varEntity.getType(), varEntity, inferer);
+					}
+				}
+			}
+		}
+	}
+
+	private void resolveJavaExpressions(Inferer inferer){
+		if (this instanceof FunctionEntity) {
+			((FunctionEntity)this).linkReturnToLastExpression();
+		}
+
 		if (expressionList==null) return;
 		if(expressionList.size()>10000) return;
 
 		List<Expression> unsolvedCalls = new ArrayList<>();
-		
+
 		for (Expression expression : expressionList) {
 
 
@@ -202,8 +282,8 @@ public abstract class ContainerEntity extends DecoratedEntity {
 //						expression.getIdentifier().contains("config")) {
 //					System.out.print("dd");
 //				}
-				
-				
+
+
 				Entity entity = inferer.resolveName(this, expression.getIdentifier(), true);
 
 				String composedName = expression.getIdentifier().toString();

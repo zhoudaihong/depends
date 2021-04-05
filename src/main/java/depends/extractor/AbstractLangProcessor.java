@@ -191,7 +191,7 @@ abstract public class AbstractLangProcessor {
 	 * @return unsolved bindings
 	 */
 	public void resolveBindings(boolean callAsImpl) {
-		logger.info("Resolve types and bindings of variables, methods and expressions....");
+//		logger.info("Resolve types and bindings of variables, methods and expressions....");
 //		System.out.println("Resolve types and bindings of variables, methods and expressions....");
 		this.potentialExternalDependencies = inferer.resolveAllBindings(callAsImpl,this);
 		if (getExternalDependencies().size() > 0) {

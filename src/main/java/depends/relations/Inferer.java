@@ -105,10 +105,18 @@ public class Inferer {
 
 	private void resolveTypes() {
 		Iterator<Entity> iterator = repo.sortedFileIterator();
+		int index = 0;
+		int allFilesNum = repo.getFileEntities().size();
 		while(iterator.hasNext()) {
 			Entity entity= iterator.next();
 			entity.inferEntities(this);
+			index++;
+			try{
+				System.out.print("\rNumber Of Type-resolved files:[" + index + "/" + allFilesNum + "]");
+				Thread.sleep(20);
+			}catch(InterruptedException e){}
 		}
+		System.out.println();
 	}
 
 	/**
@@ -365,7 +373,8 @@ public class Inferer {
 		this.isDuckTypingDeduce = isDuckTypingDeduce;
 	}
 
-
-
+	public BuiltInType getBuildInTypeManager() {
+		return buildInTypeManager;
+	}
 
 }
