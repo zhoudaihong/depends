@@ -44,22 +44,19 @@ public class AliasEntity extends Entity {
 		super(simpleName, parent, id);
 		this.originName = originTypeName;
 	}
-	public AliasEntity(GenericName simpleName, int offset, Entity parent, Integer id, GenericName originTypeName) {
-		super(simpleName, parent, id);
-		this.originName = originTypeName;
-		this.setOffsetInFile(offset);
-	}
 
 	public void inferLocalLevelEntities(Inferer inferer) {
 		if (!(referToEntity instanceof EmptyTypeEntity)) return;
 		Entity entity = inferer.resolveName(this, originName, true);
-		if(originName.getName().length() == 0 && entity.getOffsetInFile() != this.getOffsetInFile()){
+		if(originName.getName().length() == 0 && entity.getOffSetInFile() != this.getDeclarationOffset()){
 			for(Entity entity1 : entity.getAncestorOfType(FileEntity.class).getChildren()){
-				if(entity1.getOffsetInFile() == this.getOffsetInFile()){
-					if(entity1 == this){
-						continue;
+				if(entity1.getStartLine() != null){
+					if(entity1.getOffSetInFile() == this.getDeclarationOffset()){
+						if(entity1 == this){
+							continue;
+						}
+						entity = entity1;
 					}
-					entity = entity1;
 				}
 			}
 		}
@@ -217,6 +214,15 @@ public class AliasEntity extends Entity {
 	public void setDeepResolve(boolean deepResolve) {
 		this.deepResolve = deepResolve;
 	}
-	
 
+	//Use Offset of Declaration to build link between AliasEntity and its TypeEntity
+	private int declarationOffset = -1;
+
+	public int getDeclarationOffset() {
+		return declarationOffset;
+	}
+
+	public void setDeclarationOffset(int declarationOffset) {
+		this.declarationOffset = declarationOffset;
+	}
 }

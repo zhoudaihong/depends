@@ -131,6 +131,9 @@ public class CppVisitor  extends ASTVisitor {
 			String name = ASTStringUtilExt.getName(type);
 			List<GenericName> param = ASTStringUtilExt.getTemplateParameters(type);
 			TypeEntity typeEntity = context.foundNewType(name, type.getFileLocation().getStartingLineNumber());
+			if(typeEntity != null){
+				typeEntity.setOffSetInFile(type.getFileLocation().getNodeOffset());
+			}
 			if (declSpec instanceof ICPPASTCompositeTypeSpecifier) {
 				ICPPASTBaseSpecifier[] baseSpecififers = ((ICPPASTCompositeTypeSpecifier)declSpec).getBaseSpecifiers();
 				for (ICPPASTBaseSpecifier baseSpecififer:baseSpecififers) {
@@ -140,7 +143,10 @@ public class CppVisitor  extends ASTVisitor {
 			}
 		}
 		else if (declSpec instanceof  IASTEnumerationSpecifier) {
-			context.foundNewType(ASTStringUtilExt.getName(declSpec), declSpec.getFileLocation().getStartingLineNumber());
+			TypeEntity typeEntity = context.foundNewType(ASTStringUtilExt.getName(declSpec), declSpec.getFileLocation().getStartingLineNumber());
+			if(typeEntity != null){
+				typeEntity.setOffSetInFile(declSpec.getFileLocation().getNodeOffset());
+			}
 		}else {
 			//we do not care other types
 		}
@@ -263,7 +269,10 @@ public class CppVisitor  extends ASTVisitor {
 				IASTDeclSpecifier declSpecifier = ((IASTSimpleDeclaration) declaration).getDeclSpecifier();
 				//Found new typedef definition
 				if (declSpecifier.getStorageClass()==IASTDeclSpecifier.sc_typedef) {
-					context.foundNewAlias(ASTStringUtilExt.getName(declarator),ASTStringUtilExt.getName(declSpecifier));
+					AliasEntity aliasEntity = context.foundNewAlias(ASTStringUtilExt.getName(declarator),ASTStringUtilExt.getName(declSpecifier));
+					if(aliasEntity != null){
+						aliasEntity.setDeclarationOffset(((CPPASTDeclarator)declarator).getParent().getFileLocation().getNodeOffset());
+					}
 				}else if (!(declarator instanceof IASTFunctionDeclarator)) {
 					String varType = ASTStringUtilExt.getName(declSpecifier);
 					String varName = ASTStringUtilExt.getName(declarator);

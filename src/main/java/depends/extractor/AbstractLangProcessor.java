@@ -108,8 +108,6 @@ abstract public class AbstractLangProcessor {
 	 *
 	 * @param includeDir
 	 * @param inputDir
-	 * @param b
-	 * @param b
 	 */
 	public void buildDependencies(String inputDir, String[] includeDir, List<String> typeFilter, boolean callAsImpl, boolean isCollectUnsolvedBindings, boolean isDuckTypingDeduce, List<String> excludePaths) {
 		this.inputSrcPath = inputDir;
