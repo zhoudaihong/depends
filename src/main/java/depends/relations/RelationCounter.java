@@ -133,6 +133,15 @@ public class RelationCounter {
 		
 		boolean matched = false;
 		if (expression.isCall()) {
+			//修正关系到FunctionProto
+			if(referredEntity.getMutliDeclare() != null && !isInHeaderFile(referredEntity) &&
+				referredEntity.getAncestorOfType(FileEntity.class) != entity.getAncestorOfType(FileEntity.class)){
+				for(Entity entity1 : referredEntity.getMutliDeclare().getEntities()){
+					if(isInHeaderFile(entity1)){
+						referredEntity = entity1;
+					}
+				}
+			}
 			/* if it is a FunctionEntityProto, add Relation to all Impl Entities*/
 			if (callAsImpl && referredEntity instanceof FunctionEntityProto) {
 				if (entity.getAncestorOfType(FileEntity.class).getId().equals(referredEntity.getAncestorOfType(FileEntity.class).getId())){
@@ -250,6 +259,11 @@ public class RelationCounter {
 				file.addRelation(buildRelation(file,DependencyType.IMPORT,imported));
 			}
 		}
+	}
+
+	private Boolean isInHeaderFile(Entity entity){
+		return (!entity.getAncestorOfType(FileEntity.class).getQualifiedName().contains(".c") ||
+				!entity.getAncestorOfType(FileEntity.class).getQualifiedName().contains(".cpp"));
 	}
 
 }
