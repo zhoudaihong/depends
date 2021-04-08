@@ -230,6 +230,23 @@ public abstract class ContainerEntity extends DecoratedEntity {
 				}
 				if (expression.isCall()) {
 					List<Entity> funcs = this.lookupFunctionInVisibleScope(expression.getIdentifier());
+
+					//修正连接到错误的类内调用
+					if(funcs == null){
+						if(this.getQualifiedName().contains(".") && this instanceof FunctionEntity && !expression.getIdentifier().contains(".")){
+							GenericName trueName;
+							String abosoluteclassName = this.getQualifiedName().substring(0, this.getQualifiedName().lastIndexOf("."));
+							if(abosoluteclassName.contains(".")){
+								String className = abosoluteclassName.substring(abosoluteclassName.lastIndexOf('.') + 1);
+								trueName = new GenericName(className + "." + expression.getIdentifier());
+							}else{
+								trueName = new GenericName(abosoluteclassName + "." + expression.getIdentifier());
+							}
+							if(this.getParent() instanceof ContainerEntity){
+								funcs = ((ContainerEntity)this.getParent()).lookupFunctionInVisibleScope(trueName);
+							}
+						}
+					}
 					if (funcs != null) {
 						for (Entity func:funcs) {
 							expression.setType(func.getType(), func, inferer);

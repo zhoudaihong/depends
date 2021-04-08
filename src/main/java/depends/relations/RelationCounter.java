@@ -30,7 +30,9 @@ import depends.entity.repo.EntityRepo;
 import depends.extractor.AbstractLangProcessor;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class RelationCounter {
@@ -137,6 +139,10 @@ public class RelationCounter {
 			if(referredEntity.getMutliDeclare() != null && !isInHeaderFile(referredEntity) &&
 				referredEntity.getAncestorOfType(FileEntity.class) != entity.getAncestorOfType(FileEntity.class)){
 				for(Entity entity1 : referredEntity.getMutliDeclare().getEntities()){
+					if(entity1.getAncestorOfType(FileEntity.class).getId().equals(entity.getAncestorOfType(FileEntity.class).getId())){
+						referredEntity = entity1;
+						break;
+					}
 					if(isInHeaderFile(entity1)){
 						referredEntity = entity1;
 					}
@@ -155,6 +161,20 @@ public class RelationCounter {
 						for (Entity e : entities) {
 							entity.addRelation(expression, buildRelation(entity, DependencyType.IMPLLINK, e, expression.getLocation()));
 							matched = true;
+						}
+					}
+				}
+			}
+
+			//修正连接到错误的类内调用
+			if(!isInHeaderFile(referredEntity)){
+				if(!(entity.getAncestorOfType(FileEntity.class).getId().equals(referredEntity.getAncestorOfType(FileEntity.class).getId()))){
+					Entity parent = entity.getParent();
+					if(parent != null){
+						for(Entity entity1: parent.getChildren()){
+							if(entity1.getQualifiedName().contains(referredEntity.getQualifiedName())){
+								referredEntity = entity1;
+							}
 						}
 					}
 				}
@@ -211,6 +231,11 @@ public class RelationCounter {
 				}
 			}
 		}
+//		if(type.equals(DependencyType.CALL) && !isInHeaderFile(referredEntity)){
+//			if(!(from.getAncestorOfType(FileEntity.class).getId().equals(referredEntity.getAncestorOfType(FileEntity.class).getId()))){
+//				if(!referredEntity.getAncestorOfType(FileEntity.class).getQualifiedName().contains("test")) peculiarCall.put(from, referredEntity);
+//			}
+//		}
 		if (this.langProcessor==null)
 			return new Relation(type,referredEntity,location);
 		return new Relation(langProcessor.getRelationMapping(type),referredEntity,location);
@@ -266,4 +291,5 @@ public class RelationCounter {
 				!entity.getAncestorOfType(FileEntity.class).getQualifiedName().contains(".cpp"));
 	}
 
+	private Map<Entity, Entity> peculiarCall = new HashMap<>();
 }
