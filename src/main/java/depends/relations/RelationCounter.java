@@ -156,7 +156,7 @@ public class RelationCounter {
 					Entity multiDeclare = repo.getEntity(referredEntity.getQualifiedName());
 					if (multiDeclare instanceof MultiDeclareEntities) {
 						MultiDeclareEntities m = (MultiDeclareEntities) multiDeclare;
-						List<Entity> entities = m.getEntities().stream().filter(item -> (item instanceof FunctionEntityImpl))
+						List<Entity> entities = m.getEntities().stream().filter(item -> (item instanceof FunctionEntityImpl && !isInHeaderFile(item)))
 								.collect(Collectors.toList());
 						for (Entity e : entities) {
 							entity.addRelation(expression, buildRelation(entity, DependencyType.IMPLLINK, e, expression.getLocation()));
@@ -287,8 +287,9 @@ public class RelationCounter {
 	}
 
 	private Boolean isInHeaderFile(Entity entity){
-		return (!entity.getAncestorOfType(FileEntity.class).getQualifiedName().contains(".c") ||
-				!entity.getAncestorOfType(FileEntity.class).getQualifiedName().contains(".cpp"));
+		return (entity.getAncestorOfType(FileEntity.class).getQualifiedName().contains(".h") ||
+				entity.getAncestorOfType(FileEntity.class).getQualifiedName().contains(".hpp") ||
+				entity.getAncestorOfType(FileEntity.class).getQualifiedName().contains(".hxx"));
 	}
 
 	private Map<Entity, Entity> peculiarCall = new HashMap<>();
