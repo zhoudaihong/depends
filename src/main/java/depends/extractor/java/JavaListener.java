@@ -30,7 +30,6 @@ import depends.extractor.java.JavaParser.*;
 import depends.extractor.java.context.*;
 import depends.importtypes.ExactMatchImport;
 import depends.relations.Inferer;
-import sun.net.ftp.FtpDirEntry;
 
 import java.util.ArrayList;
 import java.util.List;

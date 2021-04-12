@@ -13,6 +13,10 @@
         <antlr4.visitor>true</antlr4.visitor>
         <antlr4.listener>true</antlr4.listener>
         <neo4j-ogm.version>3.1.9</neo4j-ogm.version>
+        <!-- JAXB -->
+        <javax.activation.version>1.2.0</javax.activation.version>
+        <jaxb.api.version>2.3.0</jaxb.api.version>
+        <lombok.version>1.18.6</lombok.version>
 
     </properties>
     <build>
@@ -22,8 +26,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.5</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -89,7 +93,7 @@
         <dependency>
             <groupId>eclipse-photon</groupId>
             <artifactId>org.eclipse.core.resources</artifactId>
-            <version>3.13.700.v20200209-1624</version>
+            <version>3.14.0.v20210215-0934</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -128,37 +132,37 @@
         <dependency>
             <groupId>org.eclipse.cdt</groupId>
             <artifactId>cdt-core</artifactId>
-            <version>6.11.0.202003081657</version>
+            <version>7.2.0.202102251239</version>
         </dependency>
         <dependency>
             <groupId>eclipse-photon</groupId>
             <artifactId>org.eclipse.equinox.registry</artifactId>
-            <version>3.8.700.v20200121-1457</version>
+            <version>3.10.100.v20210212-1143</version>
         </dependency>
         <dependency>
             <groupId>eclipse-photon</groupId>
             <artifactId>org.eclipse.core.runtime</artifactId>
-            <version>3.17.100.v20200203-0917</version>
+            <version>3.20.100.v20210111-0815</version>
         </dependency>
         <dependency>
             <groupId>eclipse-photon</groupId>
             <artifactId>org.eclipse.equinox.common</artifactId>
-            <version>3.11.0.v20200206-0817</version>
+            <version>3.14.100.v20210212-1143</version>
         </dependency>
         <dependency>
             <groupId>eclipse-photon</groupId>
             <artifactId>org.eclipse.osgi</artifactId>
-            <version>3.15.200.v20200214-1600</version>
+            <version>3.16.200.v20210226-1447</version>
         </dependency>
         <dependency>
             <groupId>eclipse-photon</groupId>
             <artifactId>org.eclipse.equinox.preferences</artifactId>
-            <version>3.7.700.v20191213-1901</version>
+            <version>3.8.200.v20210212-1143</version>
         </dependency>
         <dependency>
             <groupId>eclipse-photon</groupId>
             <artifactId>org.eclipse.core.jobs</artifactId>
-            <version>3.10.700.v20200106-1020</version>
+            <version>3.10.1100.v20210111-0815</version>
         </dependency>
         <dependency>
             <groupId>info.picocli</groupId>
@@ -197,5 +201,39 @@
             <artifactId>antlr4</artifactId>
             <version>final</version>
         </dependency> -->
+        <!-- JAXB -->
+
+        <dependency>
+            <groupId>com.sun.activation</groupId>
+            <artifactId>javax.activation</artifactId>
+            <version>${javax.activation.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>${jaxb.api.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-core</artifactId>
+            <version>${jaxb.api.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>${jaxb.api.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- ... -->
     </dependencies>
 </project>
