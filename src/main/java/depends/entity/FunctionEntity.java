@@ -146,4 +146,22 @@ public class FunctionEntity extends ContainerEntity{
 				expr.addDeducedTypeFunction(this);
 		}
 	}
+
+	/**
+	 * argSignature is to solve the function reload
+	 * for example : function A(const int a, char b)
+	 * A.argSignature is "const int_char"
+	 * owo
+	 */
+	private StringBuilder argSignature = new StringBuilder();
+
+	public void addToArgSignature(String paraType){
+		argSignature.append(paraType);
+	}
+
+	public String getArgSignature() {
+		return argSignature.toString();
+	}
+
+
 }

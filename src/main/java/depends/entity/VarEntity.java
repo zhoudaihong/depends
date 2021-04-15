@@ -113,4 +113,19 @@ public class VarEntity extends ContainerEntity {
 	public String getTypeIdentifier() {
 		return typeIdentifier;
 	}
+
+	/**
+	 * builtInDetail for detail of  built-in-type varentity
+	 * for example : const char a; a.builtInDetail = "const char"  ^_^
+	 */
+	private String builtInDetail;
+
+	public String getBuiltInDetail() {
+		return builtInDetail;
+	}
+
+	public void setBuiltInDetail(String builtInDetail) {
+		this.builtInDetail = builtInDetail;
+	}
+
 }

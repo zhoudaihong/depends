@@ -354,6 +354,11 @@ public class CppVisitor  extends ASTVisitor {
 		if (context.currentFunction()!=null) {
 			VarEntity var = new VarEntity(GenericName.build(parameterName),GenericName.build(parameterType),context.currentFunction(),idGenerator.generateId());
 			context.currentFunction().addParameter(var );
+			if(parameterType.equals("built-in")){
+				context.currentFunction().addToArgSignature("_" + parameterDeclaration.getDeclSpecifier().getRawSignature());
+			}else{
+				context.currentFunction().addToArgSignature("_" + parameterType);
+			}
 		}else {
 			//System.out.println("** parameterDeclaration = " + parameter);
 		}
