@@ -31,6 +31,8 @@ import depends.entity.GenericName;
 import depends.entity.repo.IdGenerator;
 import depends.extractor.HandlerContext;
 
+import java.util.regex.Pattern;
+
 public class ExpressionUsage {
 	HandlerContext context;
 	IdGenerator idGenerator;
@@ -137,7 +139,11 @@ public class ExpressionUsage {
 	private GenericName getMethodCallIdentifier(IASTFunctionCallExpression methodCall) {
 		IASTExpression f = methodCall.getFunctionNameExpression();
 		if (f instanceof IASTIdExpression) {
-			return GenericName.build(ASTStringUtilExt.getName(((IASTIdExpression)f).getName()));
+			String cdtName = ASTStringUtilExt.getName(((IASTIdExpression)f).getName());
+			if(Pattern.matches("\\w+\\(.*\\)", cdtName)){
+				cdtName = cdtName.substring(0, cdtName.indexOf('('));
+			}
+			return GenericName.build(cdtName);
 		}
 		if (f instanceof  IASTFieldReference){
 			IASTFieldReference func = (IASTFieldReference) f;
