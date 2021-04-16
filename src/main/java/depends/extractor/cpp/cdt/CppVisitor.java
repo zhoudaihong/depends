@@ -110,7 +110,7 @@ public class CppVisitor  extends ASTVisitor {
 		if (notLocalFile(namespaceDefinition)) return ASTVisitor.PROCESS_SKIP;
 		String ns = namespaceDefinition.getName().toString().replace("::", ".");
 		logger.trace("enter ICPPASTNamespaceDefinition  " + ns);
-		Entity pkg = context.foundNamespace(ns,namespaceDefinition.getFileLocation().getStartingLineNumber());
+		Entity pkg = context.foundNamespace(ns,namespaceDefinition.getFileLocation().getStartingLineNumber(),namespaceDefinition.getFileLocation().getEndingLineNumber());
 		context.foundNewImport(new PackageWildCardImport(ns));
 		return super.visit(namespaceDefinition);
 	}

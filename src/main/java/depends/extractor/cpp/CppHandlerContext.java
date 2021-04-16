@@ -36,9 +36,10 @@ public class CppHandlerContext extends HandlerContext {
 		super(entityRepo,inferer);
 	}
 
-	public Entity foundNamespace(String nampespaceName, int startingLineNumber) {
+	public Entity foundNamespace(String nampespaceName, int startingLineNumber, int endingLineNumber) {
 		PackageEntity pkgEntity = new PackageEntity(nampespaceName, currentFile(),idGenerator.generateId());
 		pkgEntity.setStartLine(startingLineNumber);
+		pkgEntity.setEndLine(endingLineNumber);
 		entityRepo.add(pkgEntity);
 		entityStack.push(pkgEntity);
 		return pkgEntity;
