@@ -102,7 +102,7 @@ public class RelationCounter {
 		for (ContainerEntity mixin:entity.getResolvedMixins()) {
 			entity.addRelation(buildRelation(entity,DependencyType.MIXIN,mixin));
 		}
-		
+
 		entity.reloadExpression(repo);
 		if (!inferer.isEagerExpressionResolve())
 		{
@@ -231,11 +231,6 @@ public class RelationCounter {
 				}
 			}
 		}
-//		if(type.equals(DependencyType.CALL) && !isInHeaderFile(referredEntity)){
-//			if(!(from.getAncestorOfType(FileEntity.class).getId().equals(referredEntity.getAncestorOfType(FileEntity.class).getId()))){
-//				if(!referredEntity.getAncestorOfType(FileEntity.class).getQualifiedName().contains("test")) peculiarCall.put(from, referredEntity);
-//			}
-//		}
 		if (this.langProcessor==null)
 			return new Relation(type,referredEntity,location);
 		return new Relation(langProcessor.getRelationMapping(type),referredEntity,location);
@@ -292,5 +287,4 @@ public class RelationCounter {
 				entity.getAncestorOfType(FileEntity.class).getQualifiedName().contains(".hxx"));
 	}
 
-	private Map<Entity, Entity> peculiarCall = new HashMap<>();
 }
