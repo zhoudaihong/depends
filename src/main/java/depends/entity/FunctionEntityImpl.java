@@ -38,7 +38,7 @@ public class FunctionEntityImpl extends FunctionEntity {
 				}
 			}
 		}
-		System.out.println("Can not find true method!");
+		//System.out.println("Can not find true method!");
 		return ;
 	}
 
