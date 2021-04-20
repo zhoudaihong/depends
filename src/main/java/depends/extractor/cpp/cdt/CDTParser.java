@@ -68,7 +68,7 @@ public class CDTParser {
 		IScanner scanner = Scanner.buildScanner(file,macroMap,sysIncludePath,false);
 		if (scanner==null) return null;
 
-		AbstractGNUSourceCodeParser sourceCodeParser = new GNUCPPSourceParser(
+		AbstractGNUSourceCodeParser sourceCodeParser = new MyGNUCSourceParser(
 				scanner, ParserMode.COMPLETE_PARSE,  new NullLogService(),
 				new GPPParserExtensionConfigurationExtension(), null);
 		IASTTranslationUnit tu =  sourceCodeParser.parse();
