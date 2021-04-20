@@ -77,7 +77,9 @@ public class CppVisitor  extends ASTVisitor {
 		MacroExtractor macroExtractor = new MacroExtractor(tu.getAllPreprocessorStatements(),context.currentFile().getQualifiedName());
 		
 		macroExtractor.extract(context);
-		for (IASTNode child:tu.getChildren()) {
+
+		CppChildCollector collector = new CppChildCollector(tu);
+		for (IASTNode child:collector.getChildren()) {
 			if (notLocalFile(child)) continue;
 			child.accept(this);
 		}
