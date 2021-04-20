@@ -221,6 +221,9 @@ public class Inferer {
 		do {
 			entity = lookupEntity(fromEntity, name, searchImport);
 			if (entity!=null ) {
+				if(indexCount == 0){
+					return entity;
+				}
 				break;
 			}
 			if (importLookupStrategy.supportGlobalNameLookup()) {
