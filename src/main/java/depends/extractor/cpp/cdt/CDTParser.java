@@ -29,11 +29,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.cdt.core.dom.ast.IASTCompoundStatement;
+import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
-import org.eclipse.cdt.core.parser.IScanner;
-import org.eclipse.cdt.core.parser.NullLogService;
-import org.eclipse.cdt.core.parser.ParserMode;
+import org.eclipse.cdt.core.parser.*;
 import org.eclipse.cdt.internal.core.dom.parser.AbstractGNUSourceCodeParser;
+import org.eclipse.cdt.internal.core.dom.parser.BacktrackException;
 import org.eclipse.cdt.internal.core.dom.parser.c.CASTTranslationUnit;
 import org.eclipse.cdt.internal.core.dom.parser.cpp.GNUCPPSourceParser;
 
@@ -68,9 +69,22 @@ public class CDTParser {
 		IScanner scanner = Scanner.buildScanner(file,macroMap,sysIncludePath,false);
 		if (scanner==null) return null;
 
-		AbstractGNUSourceCodeParser sourceCodeParser = new MyGNUCSourceParser(
+		AbstractGNUSourceCodeParser sourceCodeParser = new GNUCPPSourceParser(
 				scanner, ParserMode.COMPLETE_PARSE,  new NullLogService(),
-				new GPPParserExtensionConfigurationExtension(), null);
+				new GPPParserExtensionConfigurationExtension(), null)
+		{
+			@Override
+			protected IASTStatement handleFunctionBody() throws BacktrackException, EndOfFileException {
+				// full parse
+				if (scanner.isOnTopContext())
+					return functionBody();
+				int offset = LA(1).getOffset();
+				IToken last = skipOverCompoundStatement(true);
+				IASTCompoundStatement cs = super.getNodeFactory().newCompoundStatement();
+				setRange(cs, offset, last.getEndOffset());
+				return cs;
+			}
+		};
 		IASTTranslationUnit tu =  sourceCodeParser.parse();
 		return tu;
 	}
