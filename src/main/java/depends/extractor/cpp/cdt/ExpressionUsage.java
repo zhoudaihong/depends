@@ -127,8 +127,12 @@ public class ExpressionUsage {
 			expression.setIdentifier(ASTStringUtilExt.getName(((IASTIdExpression)ctx).getName()));
 		}else if (ctx instanceof IASTLiteralExpression) {
 		//2. if it is a var name, dertermine the type based on context.
-			expression.setIdentifier("<Literal>");
-			expression.setRawType("<Built-in>");
+			if( 2 == (((IASTLiteralExpression) ctx).getKind()) || 3 == (((IASTLiteralExpression) ctx).getKind())){
+				expression.setIdentifier(ctx.getRawSignature());
+			}else{
+				expression.setIdentifier("<Literal>");
+				expression.setRawType("<Built-in>");
+			}
 		}else if (ctx instanceof IASTTypeIdExpression) {
 		//3. if given type directly
 			expression.setRawType(ASTStringUtilExt.getTypeIdString(((IASTTypeIdExpression)ctx).getTypeId()));
