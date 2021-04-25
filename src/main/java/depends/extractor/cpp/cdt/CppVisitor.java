@@ -150,7 +150,14 @@ public class CppVisitor  extends ASTVisitor {
 			if(typeEntity != null){
 				typeEntity.setOffSetInFile(declSpec.getFileLocation().getNodeOffset());
 			}
-		}else {
+		}else if(declSpec instanceof IASTElaboratedTypeSpecifier){
+			if(((IASTElaboratedTypeSpecifier) declSpec).getKind() == 3){
+//				if(declSpec.getParent().getParent() instanceof ICPPASTNamespaceDefinition){
+//					context.foundNewImport(new FileImport(((IASTElaboratedTypeSpecifier) declSpec).getName().toString().replace("::",".")));
+//				}
+				context.foundNewImport(new FileImport(((IASTElaboratedTypeSpecifier) declSpec).getName().toString().replace("::",".")));
+			}
+		} else {
 			//we do not care other types
 		}
 		return super.visit(declSpec);

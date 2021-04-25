@@ -109,6 +109,26 @@ public class ExpressionUsage {
 					expression.setIdentifier(getMethodCallIdentifier((IASTFunctionCallExpression) op2));
 			}
 		}
+
+		//FieldReference
+		if(ctx instanceof IASTFieldReference ){
+			if(expression.getIdentifier() == null){
+				expression.setIdentifier(GenericName.build(ASTStringUtilExt.getName(((IASTFieldReference)ctx).getFieldName())));
+			}
+			expression.setDot(true);
+			Expression exprParent = expression.getParent();
+			if(exprParent != null) {
+				if (exprParent.isCall()) {
+					if(expression.getIdentifier() != null && exprParent.getIdentifier() != null){
+						if(expression.getIdentifier().getName().equals(exprParent.getIdentifier().getName())){
+							expression.setCall(true);
+						}
+					}
+
+				}
+			}
+		}
+
 		return expression;
 	}
 
@@ -127,7 +147,8 @@ public class ExpressionUsage {
 			expression.setIdentifier(ASTStringUtilExt.getName(((IASTIdExpression)ctx).getName()));
 		}else if (ctx instanceof IASTLiteralExpression) {
 		//2. if it is a var name, dertermine the type based on context.
-			if( 2 == (((IASTLiteralExpression) ctx).getKind()) || 3 == (((IASTLiteralExpression) ctx).getKind())){
+
+			if( !((ctx.getRawSignature()).equals(ctx.toString())) ){
 				expression.setIdentifier(ctx.getRawSignature());
 			}else{
 				expression.setIdentifier("<Literal>");

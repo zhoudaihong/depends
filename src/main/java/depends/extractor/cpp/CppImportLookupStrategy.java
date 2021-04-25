@@ -32,9 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import depends.entity.Entity;
-import depends.entity.FileEntity;
-import depends.entity.GenericName;
+import depends.entity.*;
 import depends.entity.repo.EntityRepo;
 import depends.extractor.UnsolvedBindings;
 import depends.importtypes.FileImport;
@@ -57,22 +55,46 @@ public class CppImportLookupStrategy implements ImportLookupStrategy {
 			Entity importedItem = repo.getEntity(file);
 			if (importedItem instanceof FileEntity) {
 				FileEntity importedFile = (FileEntity) repo.getEntity(file);
-				if (importedFile==null) continue;
-				 Entity entity = inferer.resolveName(importedFile,GenericName.build(name), false);
-				if (entity!=null) return entity;
+				if (importedFile == null) continue;
+				Entity entity = inferer.resolveName(importedFile, GenericName.build(name), false);
+				if (entity != null) return entity;
 				Collection<Entity> namespaces = fileEntity.getImportedTypes();
-				for (Entity ns:namespaces) {
+				for (Entity ns : namespaces) {
 					String nameWithPrefix;
-					if(ns.getQualifiedName().length() > 0){
+					if (ns.getQualifiedName().length() > 0) {
 						nameWithPrefix = ns.getQualifiedName() + "." + name;
-					}else{
+					} else {
 						nameWithPrefix = name;
 					}
-					entity = inferer.resolveName(importedFile,GenericName.build(nameWithPrefix), false);
-					if (entity!=null) return entity;				
+					entity = inferer.resolveName(importedFile, GenericName.build(nameWithPrefix), false);
+					if (entity != null) return entity;
 				}
-			}	
-		}		
+			}/**
+			 * For Elaborated type specifier;
+			 */
+			else if (importedItem instanceof TypeEntity) {
+				TypeEntity importedType = (TypeEntity) repo.getEntity(file);
+				if (importedType == null) continue;
+				if(name.equals(importedItem.getRawName().getName())) return importedItem;
+				Entity entity = inferer.resolveName(importedType, GenericName.build(name), false);
+				if (entity != null) {
+					return entity;
+				}
+			} else if (importedItem instanceof MultiDeclareEntities) {
+				for(Entity multi : ((MultiDeclareEntities) importedItem).getEntities()){
+					if(multi instanceof TypeEntity){
+						TypeEntity importedType = (TypeEntity) repo.getEntity(file);
+						if (importedType == null) continue;
+						if(name.equals(importedItem.getRawName().getName())) return importedItem;
+						Entity entity = inferer.resolveName(importedType, GenericName.build(name), false);
+						if (entity != null) {
+							return entity;
+						}
+					}
+				}
+			}
+		}
+
 		return null;
 	}
 
@@ -91,10 +113,12 @@ public class CppImportLookupStrategy implements ImportLookupStrategy {
 	private void foundIncludedFiles(HashSet<Integer> fileSet, Collection<Entity> importedFiles) {
 		for (Entity file:importedFiles) {
 			if (file==null ) continue;
-			if (!(file instanceof FileEntity)) continue;
+			if (!(file instanceof FileEntity || file instanceof TypeEntity || file instanceof MultiDeclareEntities)) continue;
 			if (fileSet.contains(file.getId())) continue;
 			fileSet.add(file.getId());
-			foundIncludedFiles(fileSet,((FileEntity)file).getImportedFiles());
+			if(file instanceof FileEntity){
+				foundIncludedFiles(fileSet,((FileEntity)file).getImportedFiles());
+			}
 		}
 	}
 	
