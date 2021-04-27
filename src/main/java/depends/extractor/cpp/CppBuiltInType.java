@@ -42,7 +42,7 @@ public class CppBuiltInType extends BuiltInType {
 				"register", "reinterpret_cast", "return", "short", "signed", "sizeof", "static", "static_assert",
 				"static_cast", "struct", "switch", "template", "this", "thread_local", "throw", "true", "try",
 				"typedef", "typeid", "typename", "union", "unsigned", "using", "virtual", "void", "volatile",
-				"wchar_t", "while", "<Built-in>",
+				"wchar_t", "while", "<Built-in>","std.string",
 				"__cplusplus","_cpp_aggregate_bases","__cpp_aggregate_nsdmi","__cpp_alias_templates","__cpp_aligned_new",
 				"__cpp_attributes","__cpp_binary_literals","__cpp_capture_star_this","__cpp_constexpr","__cpp_decltype",
 				"__cpp_decltype_auto","__cpp_deduction_guides","__cpp_delegating_constructors",
