@@ -99,6 +99,7 @@ public class FileEntity extends TypeEntity {
 		this.importedRelationEntities = inferer.getImportedRelationEntities(importedNames);
 		this.importedTypes = inferer.getImportedTypes(importedNames,this);
 		this.importedFiles = inferer.getImportedFiles(importedNames);
+		this.macroExpansions = inferer.getMacroExpansions(macroExpansionNames());
 
 		super.inferLocalLevelEntities(inferer);
 	}
@@ -201,4 +202,21 @@ public class FileEntity extends TypeEntity {
 
 	}
 
+	private ArrayList<String> macroExpansionNames;
+
+	private ArrayList<String> macroExpansionNames() {
+		if (macroExpansionNames==null)
+			macroExpansionNames = new ArrayList<>();
+		return this.macroExpansionNames;
+	}
+
+	public void addExpansions(String expansionName) {
+		this.macroExpansionNames().add(expansionName);
+	}
+
+	private Collection<Entity> macroExpansions;
+
+	public Collection<Entity> getMacroExpansions() {
+		return this.macroExpansions;
+	}
 }

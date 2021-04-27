@@ -380,4 +380,13 @@ public class Inferer {
 		return buildInTypeManager;
 	}
 
+	public Collection<Entity> getMacroExpansions(List<String> macroNames) {
+		ArrayList<Entity> result = new ArrayList<>();
+		for (String macroName:macroNames) {
+				Entity macro = repo.getEntity(macroName);
+				if (macro==null) continue;
+				result.add(macro);
+		}
+		return result;
+	}
 }

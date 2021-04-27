@@ -29,10 +29,7 @@ import depends.entity.*;
 import depends.entity.repo.EntityRepo;
 import depends.extractor.AbstractLangProcessor;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class RelationCounter {
@@ -70,6 +67,7 @@ public class RelationCounter {
 			return;
 		if (entity instanceof FileEntity) {
 			computeImports((FileEntity)entity);
+			computeMacroExpansions((FileEntity)entity);
 		}
 		else if (entity instanceof FunctionEntity) {
 			computeFunctionRelations((FunctionEntity)entity);
@@ -275,8 +273,29 @@ public class RelationCounter {
 			{
 				if (((FileEntity)imported).isInProjectScope())
 					file.addRelation(buildRelation(file,DependencyType.IMPORT,imported));
-			}else {
+			}else if (imported instanceof TypeEntity) {
+				//do nothing
+			} else {
 				file.addRelation(buildRelation(file,DependencyType.IMPORT,imported));
+			}
+		}
+	}
+
+	private void computeMacroExpansions(FileEntity file) {
+		Collection<Entity> expansions = file.getMacroExpansions();
+		if(expansions == null) return;
+		for(Entity macro : expansions) {
+			if(macro instanceof MultiDeclareEntities){
+				macro = ((MultiDeclareEntities) macro).getEntities().get(0);
+			}
+			if(macro instanceof VarEntity) {
+				Relation relation = buildRelation(file,DependencyType.USE,macro);
+				expansionsRelation.add(relation);
+				file.addRelation(relation);
+			}else if(macro instanceof FunctionEntity) {
+				Relation relation = buildRelation(file,DependencyType.CALL,macro);
+				expansionsRelation.add(relation);
+				file.addRelation(relation);
 			}
 		}
 	}
@@ -286,5 +305,7 @@ public class RelationCounter {
 				entity.getAncestorOfType(FileEntity.class).getQualifiedName().contains(".hpp") ||
 				entity.getAncestorOfType(FileEntity.class).getQualifiedName().contains(".hxx"));
 	}
+
+	private List<Relation> expansionsRelation = new ArrayList<>();
 
 }

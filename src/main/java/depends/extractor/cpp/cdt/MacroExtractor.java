@@ -29,6 +29,7 @@ import depends.entity.VarEntity;
 import depends.extractor.cpp.CppHandlerContext;
 import depends.relations.Inferer;
 import org.eclipse.cdt.core.dom.ast.IASTPreprocessorFunctionStyleMacroDefinition;
+import org.eclipse.cdt.core.dom.ast.IASTPreprocessorMacroExpansion;
 import org.eclipse.cdt.core.dom.ast.IASTPreprocessorObjectStyleMacroDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTPreprocessorStatement;
 
@@ -38,10 +39,12 @@ public class MacroExtractor {
 
 	private final String fileLocation;
 	private IASTPreprocessorStatement[] statements;
+	private IASTPreprocessorMacroExpansion[] expansions;
 
-	public MacroExtractor(IASTPreprocessorStatement[] statements, String fileLocation) {
+	public MacroExtractor(IASTPreprocessorStatement[] statements, String fileLocation, IASTPreprocessorMacroExpansion[] expansions) {
 		this.statements = statements;
 		this.fileLocation = fileLocation;
+		this.expansions = expansions;
 	}
 
 	public void extract(CppHandlerContext context) {
@@ -64,6 +67,14 @@ public class MacroExtractor {
 				varEntity.setStartLine(varMacro.getFileLocation().getStartingLineNumber());
 				varEntity.setEndLine(varMacro.getFileLocation().getEndingLineNumber());
 			}
+		}
+
+		for(int expansionIndex = 0; expansionIndex < expansions.length; expansionIndex++) {
+			IASTPreprocessorMacroExpansion macroExpansion = expansions[expansionIndex];
+			if (!macroExpansion.getFileLocation().getFileName().equals(fileLocation))
+				continue;
+			String macroName = macroExpansion.getRawSignature();
+			context.addMacroExpansion(macroName);
 		}
 	}
 }

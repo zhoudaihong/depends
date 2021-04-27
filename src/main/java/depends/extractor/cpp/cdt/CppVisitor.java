@@ -74,7 +74,7 @@ public class CppVisitor  extends ASTVisitor {
 		for (String incl:preprocessorHandler.getDirectIncludedFiles(tu.getAllPreprocessorStatements(),context.currentFile().getQualifiedName())) {
 			context.foundNewImport(new FileImport(incl));
 		}
-		MacroExtractor macroExtractor = new MacroExtractor(tu.getAllPreprocessorStatements(),context.currentFile().getQualifiedName());
+		MacroExtractor macroExtractor = new MacroExtractor(tu.getAllPreprocessorStatements(),context.currentFile().getQualifiedName(), tu.getMacroExpansions());
 		
 		macroExtractor.extract(context);
 

@@ -73,4 +73,8 @@ public class CppHandlerContext extends HandlerContext {
 		entityRepo.add(currentFileEntity);
 		return currentFileEntity;
 	}
+
+	public void addMacroExpansion(String macroName) {
+		currentFile().addExpansions(macroName);
+	}
 }
