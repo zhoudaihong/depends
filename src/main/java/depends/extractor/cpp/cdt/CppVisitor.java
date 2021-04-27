@@ -133,7 +133,7 @@ public class CppVisitor  extends ASTVisitor {
 			IASTCompositeTypeSpecifier type = (IASTCompositeTypeSpecifier)declSpec;
 			String name = ASTStringUtilExt.getName(type);
 			List<GenericName> param = ASTStringUtilExt.getTemplateParameters(type);
-			TypeEntity typeEntity = context.foundNewType(name, type.getFileLocation().getStartingLineNumber());
+			TypeEntity typeEntity = context.foundNewType(name, type.getFileLocation().getStartingLineNumber(), type.getFileLocation().getEndingLineNumber());
 			if(typeEntity != null){
 				typeEntity.setOffSetInFile(type.getFileLocation().getNodeOffset());
 			}
@@ -146,7 +146,7 @@ public class CppVisitor  extends ASTVisitor {
 			}
 		}
 		else if (declSpec instanceof  IASTEnumerationSpecifier) {
-			TypeEntity typeEntity = context.foundNewType(ASTStringUtilExt.getName(declSpec), declSpec.getFileLocation().getStartingLineNumber());
+			TypeEntity typeEntity = context.foundNewType(ASTStringUtilExt.getName(declSpec), declSpec.getFileLocation().getStartingLineNumber(), declSpec.getFileLocation().getEndingLineNumber());
 			if(typeEntity != null){
 				typeEntity.setOffSetInFile(declSpec.getFileLocation().getNodeOffset());
 			}

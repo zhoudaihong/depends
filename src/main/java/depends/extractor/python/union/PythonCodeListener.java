@@ -222,7 +222,7 @@ public class PythonCodeListener extends PythonParserBaseListener{
 	@Override
 	public void enterClassdef(ClassdefContext ctx) {
 		String name = getName(ctx.name());
-		TypeEntity type = context.foundNewType(name, ctx.getStart().getLine());
+		TypeEntity type = context.foundNewType(name, ctx.getStart().getLine(), ctx.getStop().getLine());
 		List<String> baseClasses = getArgList(ctx.arglist());
 		baseClasses.forEach(base -> type.addExtends(GenericName.build(base)));
 

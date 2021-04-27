@@ -63,10 +63,11 @@ public abstract class HandlerContext {
 		entityRepo.addFile(this.currentFile());
 	}
 
-	public TypeEntity foundNewType(GenericName name, Integer startLine) {
+	public TypeEntity foundNewType(GenericName name, Integer startLine, Integer endLine) {
 		TypeEntity currentTypeEntity = new TypeEntity(name, this.latestValidContainer(),
 				idGenerator.generateId());
 		currentTypeEntity.setStartLine(startLine);
+		currentTypeEntity.setEndLine(endLine);
 		pushToStack(currentTypeEntity);
 		addToRepo(currentTypeEntity);
 		currentFileEntity.addType(currentTypeEntity);
@@ -79,8 +80,8 @@ public abstract class HandlerContext {
 	 * @param startLine
 	 * @return
 	 */
-	public TypeEntity foundNewType(String name, Integer startLine) {
-		return foundNewType(GenericName.build(name),startLine);
+	public TypeEntity foundNewType(String name, Integer startLine, Integer endLine) {
+		return foundNewType(GenericName.build(name),startLine,endLine);
 	}
 
 	public AliasEntity foundNewAlias(String aliasName, String originalName) {

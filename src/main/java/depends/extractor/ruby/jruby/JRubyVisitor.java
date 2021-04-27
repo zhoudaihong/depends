@@ -68,7 +68,7 @@ public class JRubyVisitor extends NoopVisitor {
 
 	@Override
 	public Object visitClassNode(ClassNode node) {
-		TypeEntity type = context.foundNewType(helper.getName(node.getCPath()),node.getPosition().getStartLine());
+		TypeEntity type = context.foundNewType(helper.getName(node.getCPath()),node.getPosition().getStartLine(), node.getPosition().getEndLine());
 		Node superNode = node.getSuper();
 		
 		if (superNode instanceof ConstNode ||

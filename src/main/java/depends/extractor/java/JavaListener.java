@@ -72,7 +72,7 @@ public class JavaListener extends JavaParserBaseListener {
 	@Override
 	public void enterClassDeclaration(ClassDeclarationContext ctx) {
 		if (ctx.IDENTIFIER()==null) return;
-		TypeEntity type = context.foundNewType(GenericName.build(ctx.IDENTIFIER().getText()), ctx.getStart().getLine());
+		TypeEntity type = context.foundNewType(GenericName.build(ctx.IDENTIFIER().getText()), ctx.getStart().getLine(), ctx.getStop().getLine());
 		// implements
 		if (ctx.typeList() != null) {
 			for (int i = 0; i < ctx.typeList().typeType().size(); i++) {
@@ -105,7 +105,7 @@ public class JavaListener extends JavaParserBaseListener {
 
 	@Override
 	public void enterEnumDeclaration(EnumDeclarationContext ctx) {
-		TypeEntity type = context.foundNewType(GenericName.build(ctx.IDENTIFIER().getText()), ctx.getStart().getLine());
+		TypeEntity type = context.foundNewType(GenericName.build(ctx.IDENTIFIER().getText()), ctx.getStart().getLine(), ctx.getStop().getLine());
 		annotationProcessor.processAnnotationModifier(ctx, TypeDeclarationContext.class ,"classOrInterfaceModifier.annotation",context.lastContainer());
 		if (ctx.LBRACE() != null) {
 			type.setStartLine(ctx.LBRACE().getSymbol().getLine());
@@ -118,7 +118,7 @@ public class JavaListener extends JavaParserBaseListener {
 
 	@Override
 	public void enterAnnotationTypeDeclaration(AnnotationTypeDeclarationContext ctx) {
-		TypeEntity type = context.foundNewType(GenericName.build(ctx.IDENTIFIER().getText()), ctx.getStart().getLine());
+		TypeEntity type = context.foundNewType(GenericName.build(ctx.IDENTIFIER().getText()), ctx.getStart().getLine(), ctx.getStop().getLine());
 		annotationProcessor.processAnnotationModifier(ctx, TypeDeclarationContext.class ,"classOrInterfaceModifier.annotation",context.lastContainer());
 		if (ctx.annotationTypeBody().LBRACE() != null) {
 			type.setStartLine(ctx.annotationTypeBody().LBRACE().getSymbol().getLine());
@@ -141,7 +141,7 @@ public class JavaListener extends JavaParserBaseListener {
 	 */
 	@Override
 	public void enterInterfaceDeclaration(InterfaceDeclarationContext ctx) {
-		TypeEntity type = context.foundNewType(GenericName.build(ctx.IDENTIFIER().getText()), ctx.getStart().getLine());
+		TypeEntity type = context.foundNewType(GenericName.build(ctx.IDENTIFIER().getText()), ctx.getStart().getLine(), ctx.getStop().getLine());
 		// type parameters
 		if (ctx.typeParameters() != null) {
 			foundTypeParametersUse(ctx.typeParameters());
