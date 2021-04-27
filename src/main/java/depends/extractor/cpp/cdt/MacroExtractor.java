@@ -73,7 +73,7 @@ public class MacroExtractor {
 			IASTPreprocessorMacroExpansion macroExpansion = expansions[expansionIndex];
 			if (!macroExpansion.getFileLocation().getFileName().equals(fileLocation))
 				continue;
-			String macroName = macroExpansion.getRawSignature();
+			String macroName = macroExpansion.getMacroReference().getRawSignature();
 			context.addMacroExpansion(macroName);
 		}
 	}
