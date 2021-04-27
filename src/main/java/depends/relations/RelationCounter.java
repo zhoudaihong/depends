@@ -289,13 +289,9 @@ public class RelationCounter {
 				macro = ((MultiDeclareEntities) macro).getEntities().get(0);
 			}
 			if(macro instanceof VarEntity) {
-				Relation relation = buildRelation(file,DependencyType.USE,macro);
-				expansionsRelation.add(relation);
-				file.addRelation(relation);
+				file.addRelation(buildRelation(file,DependencyType.USE,macro));
 			}else if(macro instanceof FunctionEntity) {
-				Relation relation = buildRelation(file,DependencyType.CALL,macro);
-				expansionsRelation.add(relation);
-				file.addRelation(relation);
+				file.addRelation(buildRelation(file,DependencyType.CALL,macro));
 			}
 		}
 	}
@@ -306,6 +302,5 @@ public class RelationCounter {
 				entity.getAncestorOfType(FileEntity.class).getQualifiedName().contains(".hxx"));
 	}
 
-	private List<Relation> expansionsRelation = new ArrayList<>();
 
 }
