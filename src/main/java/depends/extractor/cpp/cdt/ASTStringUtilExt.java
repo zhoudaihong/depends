@@ -149,7 +149,7 @@ public class ASTStringUtilExt extends ASTStringUtil {
 
 
 	public static String getName(IASTName name) {
-		return name.getRawSignature().toString().replace("::", ".");
+		return name.toString().replace("::", ".");
 	}
 
 
