@@ -583,7 +583,7 @@ public abstract class ContainerEntity extends DecoratedEntity {
 			}
 			for (Entity child:this.getChildren()) {
 				if (child instanceof AliasEntity) {
-					if (child.getRawName().equals(varName))
+					if (child.getRawName().getName().equals(varName))
 						return child;
 				}
 			}
@@ -594,7 +594,7 @@ public abstract class ContainerEntity extends DecoratedEntity {
 
 	public VarEntity lookupVarLocally(GenericName varName) {
 		for (VarEntity var : getVars()) {
-			if (var.getRawName().equals(varName))
+			if (var.getRawName().getName().equals(varName))
 				return var;
 		}
 		return null;
