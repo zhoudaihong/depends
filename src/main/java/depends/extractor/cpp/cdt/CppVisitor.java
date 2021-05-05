@@ -111,6 +111,11 @@ public class CppVisitor  extends ASTVisitor {
 	public int visit(ICPPASTNamespaceDefinition namespaceDefinition) {
 		if (notLocalFile(namespaceDefinition)) return ASTVisitor.PROCESS_SKIP;
 		String ns = namespaceDefinition.getName().toString().replace("::", ".");
+		ICPPASTNamespaceDefinition curNs = namespaceDefinition;
+		while(curNs.getParent() != null && curNs.getParent() instanceof ICPPASTNamespaceDefinition) {
+			ns = ((ICPPASTNamespaceDefinition)(curNs.getParent())).getName().toString().replace("::", ".") + "." + ns;
+			curNs = ((ICPPASTNamespaceDefinition)(curNs.getParent()));
+		}
 		logger.trace("enter ICPPASTNamespaceDefinition  " + ns);
 		Entity pkg = context.foundNamespace(ns,namespaceDefinition.getFileLocation().getStartingLineNumber(),namespaceDefinition.getFileLocation().getEndingLineNumber());
 		context.foundNewImport(new PackageWildCardImport(ns));
@@ -197,6 +202,27 @@ public class CppVisitor  extends ASTVisitor {
 			}
 			else if ( declarator.getParent() instanceof IASTFunctionDefinition) {
 				IASTFunctionDefinition decl = (IASTFunctionDefinition)declarator.getParent();
+				returnType = buildGenericNameFromDeclSpecifier(decl.getDeclSpecifier());
+				String rawName = ASTStringUtilExt.getName(declarator);
+				List<Entity> namedEntity = context.currentFile().lookupFunctionInVisibleScope(GenericName.build(rawName));
+				if (namedEntity!=null) {
+					rawName = namedEntity.get(0).getQualifiedName();
+				}
+				returnType = reMapIfConstructDeconstruct(rawName,returnType);
+				context.foundMethodDeclaratorImplementation(rawName, returnType,decl.getFileLocation().getStartingLineNumber());
+			}else if ( declarator.getParent().getParent() instanceof IASTSimpleDeclaration) {
+				IASTSimpleDeclaration decl = (IASTSimpleDeclaration)(declarator.getParent().getParent());
+				returnType = buildGenericNameFromDeclSpecifier(decl.getDeclSpecifier());
+				String rawName = ASTStringUtilExt.getName(declarator);
+				List<Entity> namedEntity = context.currentFile().lookupFunctionInVisibleScope(GenericName.build(rawName));
+				if (namedEntity!=null) {
+					rawName = namedEntity.get(0).getQualifiedName();
+				}
+				returnType = reMapIfConstructDeconstruct(rawName,returnType);
+				context.foundMethodDeclaratorProto(rawName, returnType,decl.getFileLocation().getStartingLineNumber());
+			}
+			else if ( declarator.getParent().getParent() instanceof IASTFunctionDefinition) {
+				IASTFunctionDefinition decl = (IASTFunctionDefinition)declarator.getParent().getParent();
 				returnType = buildGenericNameFromDeclSpecifier(decl.getDeclSpecifier());
 				String rawName = ASTStringUtilExt.getName(declarator);
 				List<Entity> namedEntity = context.currentFile().lookupFunctionInVisibleScope(GenericName.build(rawName));
