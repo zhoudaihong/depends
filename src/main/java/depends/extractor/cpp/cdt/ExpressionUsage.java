@@ -129,6 +129,13 @@ public class ExpressionUsage {
 			}
 		}
 
+		//Usingdeclaration
+		if(expression.getIdentifier() != null) {
+			if(context.currentFile().UsingReflection().containsKey(expression.getIdentifier().getName())) {
+				expression.setIdentifier(GenericName.build(context.currentFile().UsingReflection().get(expression.getIdentifier().getName())));
+			}
+		}
+
 		return expression;
 	}
 

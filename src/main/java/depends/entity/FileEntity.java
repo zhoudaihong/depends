@@ -24,11 +24,7 @@ SOFTWARE.
 
 package depends.entity;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import depends.importtypes.Import;
 import depends.relations.Inferer;
@@ -100,7 +96,7 @@ public class FileEntity extends TypeEntity {
 		this.importedTypes = inferer.getImportedTypes(importedNames,this);
 		this.importedFiles = inferer.getImportedFiles(importedNames);
 		this.macroExpansions = inferer.getMacroExpansions(macroExpansionNames());
-
+		moveFunctions();
 		super.inferLocalLevelEntities(inferer);
 	}
 
@@ -218,5 +214,27 @@ public class FileEntity extends TypeEntity {
 
 	public Collection<Entity> getMacroExpansions() {
 		return this.macroExpansions;
+	}
+
+	private Collection<Entity> importedFunctions = new ArrayList<>();
+
+	private void moveFunctions () {
+		Iterator<Entity> it = importedTypes.iterator();
+		while(it.hasNext()){
+			Entity entity = it.next();
+			if(entity instanceof FunctionEntity || ((entity instanceof MultiDeclareEntities) && ((MultiDeclareEntities) entity).isContainsTypeEntity() == false )) {
+				importedFunctions.add(entity);
+				it.remove();
+			}
+		}
+	}
+
+	private Map<String, String> usingReflection;
+
+	public Map<String, String> UsingReflection() {
+		if(usingReflection == null) {
+			usingReflection = new HashMap<>();
+		}
+		return usingReflection;
 	}
 }

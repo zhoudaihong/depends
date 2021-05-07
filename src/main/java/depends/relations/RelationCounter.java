@@ -198,6 +198,7 @@ public class RelationCounter {
 					(referredEntity instanceof VarEntity ||referredEntity instanceof FunctionEntity)) {
 				if (entity.getAncestorOfType(FileEntity.class).getId().equals(referredEntity.getAncestorOfType(FileEntity.class).getId())){
 					entity.addRelation(buildRelation(entity,DependencyType.USE,referredEntity,expression.getLocation()));
+					matched = true;
 				}else {
 					MultiDeclareEntities m = (MultiDeclareEntities) (repo.getEntity(referredEntity.getQualifiedName()));
 					for (Entity e : m.getEntities()) {
@@ -210,7 +211,7 @@ public class RelationCounter {
 					}
 				}
 			}
-			else {
+			if (!matched) {
 				entity.addRelation(expression,buildRelation(entity,DependencyType.USE,referredEntity,expression.getLocation()));
 			}
 		}

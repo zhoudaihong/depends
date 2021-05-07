@@ -28,6 +28,7 @@ import depends.entity.*;
 import depends.entity.repo.EntityRepo;
 import depends.entity.repo.IdGenerator;
 import depends.importtypes.Import;
+import depends.importtypes.UsingImport;
 import depends.relations.Inferer;
 
 import java.util.ArrayList;
@@ -145,6 +146,14 @@ public abstract class HandlerContext {
 
 	public void foundNewImport(Import imported) {
 		currentFileEntity.addImport(imported);
+		/*
+			方便表达式替换关键字
+		 */
+		if(imported instanceof UsingImport) {
+			String newName = imported.getContent();
+			String curName = newName.substring(newName.lastIndexOf(".") + 1);
+			currentFileEntity.UsingReflection().put(curName, newName);
+		}
 	}
 
 	public TypeEntity currentType() {

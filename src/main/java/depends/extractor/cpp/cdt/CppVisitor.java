@@ -32,6 +32,7 @@ import depends.extractor.cpp.CppHandlerContext;
 import depends.importtypes.ExactMatchImport;
 import depends.importtypes.FileImport;
 import depends.importtypes.PackageWildCardImport;
+import depends.importtypes.UsingImport;
 import depends.relations.Inferer;
 import org.codehaus.plexus.util.StringUtils;
 import org.eclipse.cdt.core.dom.ast.*;
@@ -157,10 +158,20 @@ public class CppVisitor  extends ASTVisitor {
 			}
 		}else if(declSpec instanceof IASTElaboratedTypeSpecifier){
 			if(((IASTElaboratedTypeSpecifier) declSpec).getKind() == 3){
-//				if(declSpec.getParent().getParent() instanceof ICPPASTNamespaceDefinition){
-//					context.foundNewImport(new FileImport(((IASTElaboratedTypeSpecifier) declSpec).getName().toString().replace("::",".")));
-//				}
-				context.foundNewImport(new FileImport(((IASTElaboratedTypeSpecifier) declSpec).getName().toString().replace("::",".")));
+				String ns = ((IASTElaboratedTypeSpecifier) declSpec).getName().toString().replace("::",".");
+				if(declSpec.getParent() != null) {
+					IASTNode curNs = declSpec.getParent();
+					if(curNs instanceof ICPPASTNamespaceDefinition) {
+						ns = ((ICPPASTNamespaceDefinition)(curNs)).getName().toString().replace("::", ".") + "." + ns;
+					}
+					while(curNs.getParent() != null) {
+						curNs = curNs.getParent();
+						if(curNs instanceof ICPPASTNamespaceDefinition) {
+							ns = ((ICPPASTNamespaceDefinition)(curNs)).getName().toString().replace("::", ".") + "." + ns;
+						}
+					}
+				}
+				context.foundNewImport(new FileImport(ns));
 			}
 		} else {
 			//we do not care other types
@@ -294,7 +305,19 @@ public class CppVisitor  extends ASTVisitor {
 		
 		if (declaration instanceof ICPPASTUsingDeclaration) {
 			String ns = ASTStringUtilExt.getName((ICPPASTUsingDeclaration)declaration);
-			context.foundNewImport(new PackageWildCardImport(ns));
+			if(declaration.getParent() != null) {
+				IASTNode curNs = declaration.getParent();
+				if(curNs instanceof ICPPASTNamespaceDefinition) {
+					ns = ((ICPPASTNamespaceDefinition)(curNs)).getName().toString().replace("::", ".") + "." + ns;
+				}
+				while(curNs.getParent() != null) {
+					curNs = curNs.getParent();
+					if(curNs instanceof ICPPASTNamespaceDefinition) {
+						ns = ((ICPPASTNamespaceDefinition)(curNs)).getName().toString().replace("::", ".") + "." + ns;
+					}
+				}
+			}
+			context.foundNewImport(new UsingImport(ns));
 		}
 		else if (declaration instanceof ICPPASTUsingDirective) {
 			String ns = ((ICPPASTUsingDirective)declaration).getQualifiedName().toString().replace("::", ".");

@@ -56,7 +56,9 @@ public class CppImportLookupStrategy implements ImportLookupStrategy {
 				FileEntity importedFile = (FileEntity) repo.getEntity(file);
 				if (importedFile == null) continue;
 				Entity entity = inferer.resolveName(importedFile, GenericName.build(name), false);
-				if (entity != null) return entity;
+				if (entity != null) {
+					return entity;
+				}
 				Collection<Entity> namespaces = fileEntity.getImportedTypes();
 				for (Entity ns : namespaces) {
 					String nameWithPrefix;
@@ -66,7 +68,9 @@ public class CppImportLookupStrategy implements ImportLookupStrategy {
 						nameWithPrefix = name;
 					}
 					entity = inferer.resolveName(importedFile, GenericName.build(nameWithPrefix), false);
-					if (entity != null) return entity;
+					if (entity != null) {
+						return entity;
+					}
 				}
 			}/**
 			 * For Elaborated type specifier;
