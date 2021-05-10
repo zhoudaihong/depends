@@ -412,9 +412,9 @@ public class CppVisitor  extends ASTVisitor {
 
 		logger.trace("enter IASTParameterDeclaration  " + parameterDeclaration.getClass().getSimpleName());
 		String parameterName = ASTStringUtilExt.getName(parameterDeclaration.getDeclarator());
-		String parameterType = ASTStringUtilExt.getName(parameterDeclaration.getDeclSpecifier());
+		GenericName parameterType = buildGenericNameFromDeclSpecifier(parameterDeclaration.getDeclSpecifier());
 		if (context.currentFunction()!=null) {
-			VarEntity var = new VarEntity(GenericName.build(parameterName),GenericName.build(parameterType),context.currentFunction(),idGenerator.generateId());
+			VarEntity var = new VarEntity(GenericName.build(parameterName),parameterType,context.currentFunction(),idGenerator.generateId());
 			context.currentFunction().addParameter(var );
 			if(parameterType.equals("built-in")){
 				context.currentFunction().addToArgSignature("_" + parameterDeclaration.getDeclSpecifier().getRawSignature());
