@@ -206,6 +206,15 @@ public class TypeEntity extends ContainerEntity {
 		}
 		return null;
 	}
-	
-	
+
+	private boolean isEnum = false;
+
+	public boolean isEnum() {
+		return isEnum;
+	}
+
+	public void setEnum(boolean anEnum) {
+		isEnum = anEnum;
+	}
+
 }

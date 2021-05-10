@@ -293,4 +293,15 @@ public abstract class Entity {
 	public void setOffSetInFile(int offSetInFile) {
 		this.offSetInFile = offSetInFile;
 	}
+
+	public void levelCrossedLookup(Entity grandson) {
+		visibleNames.put(grandson.getRawName().getName(), grandson);
+		String preName = grandson.getQualifiedName();
+		if(preName.lastIndexOf(grandson.getParent().getRawName().getName() + ".") == -1) {
+			visibleNames.put(preName, grandson);
+		} else {
+			String newName = preName.substring(0, preName.lastIndexOf(grandson.getParent().getRawName().getName() + ".")) + grandson.getRawName().getName();
+			visibleNames.put(newName, grandson);
+		}
+	}
 }

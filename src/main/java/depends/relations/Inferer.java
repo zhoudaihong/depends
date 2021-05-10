@@ -295,6 +295,14 @@ public class Inferer {
 			if (child.getRawName().getName().equals(names[nameIndex])) {
 				return findEntitySince(child, names, nameIndex + 1);
 			}
+			//In C++,an enumararion can be used directly
+			if(child instanceof TypeEntity && ((TypeEntity) child).isEnum()) {
+				for(Entity enumeration : child.getChildren()) {
+					if (enumeration.getRawName().getName().equals(names[nameIndex])) {
+						return findEntitySince(enumeration, names, nameIndex + 1);
+					}
+				}
+			}
 		}
 		return null;
 	}

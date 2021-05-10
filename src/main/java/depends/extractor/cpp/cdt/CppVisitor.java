@@ -153,6 +153,7 @@ public class CppVisitor  extends ASTVisitor {
 		}
 		else if (declSpec instanceof  IASTEnumerationSpecifier) {
 			TypeEntity typeEntity = context.foundNewType(ASTStringUtilExt.getName(declSpec), declSpec.getFileLocation().getStartingLineNumber(), declSpec.getFileLocation().getEndingLineNumber());
+			typeEntity.setEnum(true);
 			if(typeEntity != null){
 				typeEntity.setOffSetInFile(declSpec.getFileLocation().getNodeOffset());
 			}
@@ -390,6 +391,9 @@ public class CppVisitor  extends ASTVisitor {
 		if (notLocalFile(enumerator)) return ASTVisitor.PROCESS_SKIP;
 		logger.trace("enter IASTEnumerator  " + enumerator.getClass().getSimpleName());
 		VarEntity var = context.foundVarDefinition(enumerator.getName().toString(), context.currentType().getRawName(), new ArrayList<>(),enumerator.getFileLocation().getStartingLineNumber());
+		if(var.getParent().getParent() != null) {
+			var.getParent().getParent().levelCrossedLookup(var);
+		}
 		return super.visit(enumerator);
 	}
 	
