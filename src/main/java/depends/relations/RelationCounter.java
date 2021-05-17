@@ -91,6 +91,9 @@ public class RelationCounter {
 				var.addRelation(buildRelation(var, DependencyType.PARAMETER,type,type.getLocation()));
 			}
 		}
+		for(AliasEntity alias : entity.getAlias()) {
+			entity.addRelation(buildRelation(entity,DependencyType.USE,alias.getReferToEntity(),alias.getLocation()));
+		}
 		for (Entity type:entity.getResolvedAnnotations()) {
 			entity.addRelation(buildRelation(entity,DependencyType.ANNOTATION,type));
 		}
@@ -212,7 +215,11 @@ public class RelationCounter {
 				}
 			}
 			if (!matched) {
-				entity.addRelation(expression,buildRelation(entity,DependencyType.USE,referredEntity,expression.getLocation()));
+				if(referredEntity instanceof FunctionEntity) {
+					entity.addRelation(expression,buildRelation(entity,DependencyType.CALL,referredEntity,expression.getLocation()));
+				} else {
+					entity.addRelation(expression,buildRelation(entity,DependencyType.USE,referredEntity,expression.getLocation()));
+				}
 			}
 		}
 	}
@@ -278,6 +285,19 @@ public class RelationCounter {
 				//do nothing
 			} else {
 				file.addRelation(buildRelation(file,DependencyType.IMPORT,imported));
+			}
+		}
+
+		Collection<Entity> importedfuncntion = file.getImportedFunctions();
+		for(Entity imported : importedfuncntion) {
+			if(imported instanceof FunctionEntity) {
+				file.addRelation(buildRelation(file,DependencyType.CALL,imported));
+			} else if(imported instanceof MultiDeclareEntities) {
+				for(Entity multi : ((MultiDeclareEntities) imported).getEntities()) {
+					if(multi instanceof FunctionEntity && imports.contains(multi.getAncestorOfType(FileEntity.class))) {
+						file.addRelation(buildRelation(file,DependencyType.CALL,imported));
+					}
+				}
 			}
 		}
 	}
