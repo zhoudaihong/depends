@@ -83,6 +83,10 @@ public class FunctionEntity extends ContainerEntity{
 		for (VarEntity param:parameters) {
 			param.fillCandidateTypes(inferer);
 			param.inferLocalLevelEntities(inferer);
+			if(param.getRawType() != null) {
+				Collection<Entity> typeEntities = typeParametersToEntities(inferer, param.getRawType());
+				this.appendTypeParameters(typeEntities);
+			}
 		}
 		if (returnTypes.size()<returnTypeIdentifiers.size()) {
 			returnTypes = identiferToEntities(inferer,this.returnTypeIdentifiers);
