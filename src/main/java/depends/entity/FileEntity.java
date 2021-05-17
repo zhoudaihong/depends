@@ -218,6 +218,9 @@ public class FileEntity extends TypeEntity {
 
 	private Collection<Entity> importedFunctions = new ArrayList<>();
 
+	public Collection<Entity> getImportedFunctions() {
+		return importedFunctions;
+	}
 	private void moveFunctions () {
 		Iterator<Entity> it = importedTypes.iterator();
 		while(it.hasNext()){
