@@ -30,6 +30,7 @@ import depends.entity.Expression;
 import depends.entity.GenericName;
 import depends.entity.repo.IdGenerator;
 import depends.extractor.HandlerContext;
+import org.eclipse.cdt.internal.core.dom.parser.cpp.CPPASTTemplateId;
 
 import java.util.regex.Pattern;
 
@@ -47,6 +48,13 @@ public class ExpressionUsage {
 		context.lastContainer().addExpression(declarator,expression);
 		expression.setCall(true);
 		expression.setIdentifier(functionName);
+	}
+
+	public void foundUseExpressionOfTemplateId(String templateArg, IASTNode node) {
+		/* create expression and link it with parent*/
+		Expression expression = new Expression(idGenerator.generateId());
+		context.lastContainer().addExpression(node,expression);
+		expression.setIdentifier(templateArg);
 	}
 	
 	public Expression foundExpression(IASTExpression ctx) {
@@ -171,7 +179,16 @@ public class ExpressionUsage {
 	private GenericName getMethodCallIdentifier(IASTFunctionCallExpression methodCall) {
 		IASTExpression f = methodCall.getFunctionNameExpression();
 		if (f instanceof IASTIdExpression) {
-			String cdtName = ASTStringUtilExt.getName(((IASTIdExpression)f).getName());
+			String cdtName;
+			//for template call
+			if(((IASTIdExpression)f).getName() instanceof CPPASTTemplateId) {
+				cdtName = ASTStringUtilExt.getName(((CPPASTTemplateId) ((IASTIdExpression)f).getName()).getTemplateName());
+				for(IASTNode arg : (((CPPASTTemplateId) ((IASTIdExpression)f).getName()).getTemplateArguments())) {
+					this.foundUseExpressionOfTemplateId(arg.getRawSignature(), arg);
+				}
+			} else {
+				cdtName = ASTStringUtilExt.getName(((IASTIdExpression)f).getName());
+			}
 			if(Pattern.matches("\\w+\\(.*\\)", cdtName)){
 				cdtName = cdtName.substring(0, cdtName.indexOf('('));
 			}
