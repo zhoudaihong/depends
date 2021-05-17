@@ -108,21 +108,26 @@ public class CppImportLookupStrategy implements ImportLookupStrategy {
 				return includedFiles.get(fileEntity.getId());
 		}
 		List<Integer> fileSet = new ArrayList<>();
-		foundIncludedFiles(fileSet, fileEntity.getImportedFiles());
+		foundIncludedFiles(fileSet, fileEntity.getImportedFiles(), fileEntity.getQualifiedName(), fileEntity.getQualifiedName());
 		includedFiles.put(fileEntity.getId(), fileSet);
 		return fileSet;
 	}
 
-	private void foundIncludedFiles(List<Integer> fileSet, Collection<Entity> importedFiles) {
+	private void foundIncludedFiles(List<Integer> fileSet, Collection<Entity> importedFiles, String fileName, String originFileName) {
+		String prefixFileName = fileName.substring(0, fileName.lastIndexOf("."));
+		String prefixOriginFileName = originFileName.substring(0, originFileName.lastIndexOf("."));
 		for (Entity file:importedFiles) {
 			if (file==null ) continue;
-			if (!(file instanceof FileEntity || file instanceof TypeEntity || file instanceof MultiDeclareEntities)) continue;
+			if(prefixFileName.equals(prefixOriginFileName)) {
+				if (!(file instanceof FileEntity || file instanceof TypeEntity || file instanceof MultiDeclareEntities)) continue;
+			}
+			if (!(file instanceof FileEntity || file instanceof MultiDeclareEntities)) continue;
 			if (fileSet.contains(file.getId())) continue;
 			if(!fileSet.contains(file.getId())){
 				fileSet.add(file.getId());
 			}
 			if(file instanceof FileEntity){
-				foundIncludedFiles(fileSet,((FileEntity)file).getImportedFiles());
+				foundIncludedFiles(fileSet,((FileEntity)file).getImportedFiles(), file.getQualifiedName(), originFileName);
 			}
 		}
 	}
