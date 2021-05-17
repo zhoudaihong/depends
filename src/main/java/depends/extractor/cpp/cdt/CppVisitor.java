@@ -222,27 +222,6 @@ public class CppVisitor  extends ASTVisitor {
 				}
 				returnType = reMapIfConstructDeconstruct(rawName,returnType);
 				context.foundMethodDeclaratorImplementation(rawName, returnType,decl.getFileLocation().getStartingLineNumber());
-			}else if ( declarator.getParent().getParent() instanceof IASTSimpleDeclaration) {
-				IASTSimpleDeclaration decl = (IASTSimpleDeclaration)(declarator.getParent().getParent());
-				returnType = buildGenericNameFromDeclSpecifier(decl.getDeclSpecifier());
-				String rawName = ASTStringUtilExt.getName(declarator);
-				List<Entity> namedEntity = context.currentFile().lookupFunctionInVisibleScope(GenericName.build(rawName));
-				if (namedEntity!=null) {
-					rawName = namedEntity.get(0).getQualifiedName();
-				}
-				returnType = reMapIfConstructDeconstruct(rawName,returnType);
-				context.foundMethodDeclaratorProto(rawName, returnType,decl.getFileLocation().getStartingLineNumber());
-			}
-			else if ( declarator.getParent().getParent() instanceof IASTFunctionDefinition) {
-				IASTFunctionDefinition decl = (IASTFunctionDefinition)declarator.getParent().getParent();
-				returnType = buildGenericNameFromDeclSpecifier(decl.getDeclSpecifier());
-				String rawName = ASTStringUtilExt.getName(declarator);
-				List<Entity> namedEntity = context.currentFile().lookupFunctionInVisibleScope(GenericName.build(rawName));
-				if (namedEntity!=null) {
-					rawName = namedEntity.get(0).getQualifiedName();
-				}
-				returnType = reMapIfConstructDeconstruct(rawName,returnType);
-				context.foundMethodDeclaratorImplementation(rawName, returnType,decl.getFileLocation().getStartingLineNumber());
 			}
 		}
 		return super.visit(declarator);
@@ -317,6 +296,9 @@ public class CppVisitor  extends ASTVisitor {
 						ns = ((ICPPASTNamespaceDefinition)(curNs)).getName().toString().replace("::", ".") + "." + ns;
 					}
 				}
+			}
+			while (ns.startsWith(".")) {
+				ns = ns.substring(1);
 			}
 			context.foundNewImport(new UsingImport(ns));
 		}
