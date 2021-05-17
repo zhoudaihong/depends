@@ -133,6 +133,11 @@ public abstract class ContainerEntity extends DecoratedEntity {
 				func.inferLocalLevelEntities(inferer);
 			}
 		}
+		for (AliasEntity alias : this.alias()) {
+			if (alias.getParent()!=this) {
+				alias.inferLocalLevelEntities(inferer);
+			}
+		}
 		if (inferer.isEagerExpressionResolve()) {
 			reloadExpression(inferer.getRepo());
 			resolveExpressions(inferer);
@@ -184,6 +189,7 @@ public abstract class ContainerEntity extends DecoratedEntity {
 		if (expressionList==null) return;
 		if(expressionList.size()>10000) return;
 
+		Entity fileEntity = this.getAncestorOfType(FileEntity.class);
 
 		for (Expression expression : expressionList) {
 			// 1. if expression's type existed, break;
@@ -204,6 +210,11 @@ public abstract class ContainerEntity extends DecoratedEntity {
 				}
 			}
 			if (expression.getIdentifier() != null) {
+
+				//Usingdeclaration
+				if(fileEntity != null && ((FileEntity)fileEntity).UsingReflection().containsKey(expression.getIdentifier().getName())) {
+					expression.setIdentifier(GenericName.build(((FileEntity)fileEntity).UsingReflection().get(expression.getIdentifier().getName())));
+				}
 
 //				if (this.getAncestorOfType(FileEntity.class).getRawName().contains("/examples/usersession/server.py") &&
 //						expression.getIdentifier().contains("config")) {
@@ -594,8 +605,11 @@ public abstract class ContainerEntity extends DecoratedEntity {
 
 	public VarEntity lookupVarLocally(GenericName varName) {
 		for (VarEntity var : getVars()) {
-			if (var.getRawName().getName().equals(varName.getName()))
-				return var;
+			if(var.getRawName() != null && varName != null) {
+				if (var.getRawName().getName().equals(varName.getName())) {
+					return var;
+				}
+			}
 		}
 		return null;
 	}
@@ -643,5 +657,21 @@ public abstract class ContainerEntity extends DecoratedEntity {
 			parent = parent.getParent();
 		}
 		return  false;
+	}
+
+	private ArrayList<AliasEntity> alias;
+
+	public void addAlias(AliasEntity aliasEntity) {
+		this.alias().add(aliasEntity);
+	}
+
+	private ArrayList<AliasEntity> alias() {
+		if (alias==null)
+			alias = new ArrayList<>();
+		return this.alias;
+	}
+
+	public ArrayList<AliasEntity> getAlias () {
+		return alias();
 	}
 }

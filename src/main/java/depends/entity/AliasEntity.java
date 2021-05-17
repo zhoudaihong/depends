@@ -225,4 +225,8 @@ public class AliasEntity extends Entity {
 	public void setDeclarationOffset(int declarationOffset) {
 		this.declarationOffset = declarationOffset;
 	}
+
+	public GenericName getOriginName() {
+		return originName;
+	}
 }

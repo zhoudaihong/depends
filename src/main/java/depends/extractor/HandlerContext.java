@@ -91,6 +91,7 @@ public abstract class HandlerContext {
 		AliasEntity currentTypeEntity = new AliasEntity(GenericName.build(aliasName), this.latestValidContainer(),
 				idGenerator.generateId(),GenericName.build(originalName) );
 	 	addToRepo(currentTypeEntity);
+		lastContainer().addAlias(currentTypeEntity);
 		return currentTypeEntity;		
 	}
 	

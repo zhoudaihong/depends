@@ -32,17 +32,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import depends.entity.*;
 import depends.extractor.java.JavaImportLookupStrategy;
 import depends.extractor.java.JavaProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import depends.entity.Entity;
-import depends.entity.FileEntity;
-import depends.entity.FunctionCall;
-import depends.entity.GenericName;
-import depends.entity.TypeEntity;
-import depends.entity.VarEntity;
 import depends.entity.repo.BuiltInType;
 import depends.entity.repo.EntityRepo;
 import depends.entity.repo.NullBuiltInType;
@@ -247,6 +242,16 @@ public class Inferer {
 			return null;
 		if (names.length == 1) {
 			return entity;
+		}
+
+		if(entity instanceof AliasEntity) {
+			names[names.length-indexCount - 1] = ((AliasEntity) entity).getOriginName().getName();
+			StringBuilder stringBuilder = new StringBuilder();
+			for(int i = 0;i < names.length; i++) {
+				stringBuilder.append(i==0 ? names[i] : '.' + names[i]);
+			}
+			Entity inferEntity =  resolveName(fromEntity, GenericName.build(stringBuilder.toString()), true);
+			if(inferEntity != null) return inferEntity;
 		}
 		// then find the subsequent symbols
 		return findEntitySince(entity, names, names.length-indexCount);
