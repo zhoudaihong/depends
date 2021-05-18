@@ -159,7 +159,17 @@ public class ExpressionUsage {
 		//1. we only handle leaf node. if there is still expression,
 		//   the type will be determined by child node in the expression
 		if (ctx instanceof IASTIdExpression){
-			expression.setIdentifier(ASTStringUtilExt.getName(((IASTIdExpression)ctx).getName()));
+			String cdtName = ASTStringUtilExt.getName(((IASTIdExpression)ctx).getName());
+			if(((IASTIdExpression)ctx).getName() instanceof CPPASTTemplateId) {
+				cdtName = ASTStringUtilExt.getName(((CPPASTTemplateId) ((IASTIdExpression)ctx).getName()).getTemplateName());
+			} else if(((IASTIdExpression)ctx).getName().getLastName() instanceof CPPASTTemplateId) {
+				String templateName = ASTStringUtilExt.getName(((CPPASTTemplateId) ((IASTIdExpression)ctx).getName().getLastName()).getTemplateName());
+				String fullName = ASTStringUtilExt.getName(((IASTIdExpression)ctx).getName());
+				if(fullName.lastIndexOf(templateName) != -1) {
+					cdtName = fullName.substring(0, fullName.lastIndexOf(templateName)) + templateName;
+				}
+			}
+			expression.setIdentifier(cdtName);
 		}else if (ctx instanceof IASTLiteralExpression) {
 		//2. if it is a var name, dertermine the type based on context.
 
@@ -179,15 +189,22 @@ public class ExpressionUsage {
 	private GenericName getMethodCallIdentifier(IASTFunctionCallExpression methodCall) {
 		IASTExpression f = methodCall.getFunctionNameExpression();
 		if (f instanceof IASTIdExpression) {
-			String cdtName;
+			String cdtName = ASTStringUtilExt.getName(((IASTIdExpression)f).getName());
 			//for template call
 			if(((IASTIdExpression)f).getName() instanceof CPPASTTemplateId) {
 				cdtName = ASTStringUtilExt.getName(((CPPASTTemplateId) ((IASTIdExpression)f).getName()).getTemplateName());
 				for(IASTNode arg : (((CPPASTTemplateId) ((IASTIdExpression)f).getName()).getTemplateArguments())) {
 					this.foundUseExpressionOfTemplateId(arg.getRawSignature(), arg);
 				}
-			} else {
-				cdtName = ASTStringUtilExt.getName(((IASTIdExpression)f).getName());
+			} else if(((IASTIdExpression)f).getName().getLastName() instanceof CPPASTTemplateId) {
+				String templateName = ASTStringUtilExt.getName(((CPPASTTemplateId) ((IASTIdExpression)f).getName().getLastName()).getTemplateName());
+				String fullName = ASTStringUtilExt.getName(((IASTIdExpression)f).getName());
+				if(fullName.lastIndexOf(templateName) != -1) {
+					cdtName = fullName.substring(0, fullName.lastIndexOf(templateName)) + templateName;
+				}
+				for(IASTNode arg : (((CPPASTTemplateId) ((IASTIdExpression)f).getName().getLastName()).getTemplateArguments())) {
+					this.foundUseExpressionOfTemplateId(arg.getRawSignature(), arg);
+				}
 			}
 			if(Pattern.matches("\\w+\\(.*\\)", cdtName)){
 				cdtName = cdtName.substring(0, cdtName.indexOf('('));
