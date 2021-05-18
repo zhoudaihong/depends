@@ -120,8 +120,9 @@ public class CppImportLookupStrategy implements ImportLookupStrategy {
 			if (file==null ) continue;
 			if(prefixFileName.equals(prefixOriginFileName)) {
 				if (!(file instanceof FileEntity || file instanceof TypeEntity || file instanceof MultiDeclareEntities)) continue;
+			} else {
+				if (!(file instanceof FileEntity || file instanceof MultiDeclareEntities)) continue;
 			}
-			if (!(file instanceof FileEntity || file instanceof MultiDeclareEntities)) continue;
 			if (fileSet.contains(file.getId())) continue;
 			if(!fileSet.contains(file.getId())){
 				fileSet.add(file.getId());
