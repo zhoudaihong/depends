@@ -289,15 +289,22 @@ public class RelationCounter {
 		}
 
 		Collection<Entity> importedfuncntion = file.getImportedFunctions();
-		for(Entity imported : importedfuncntion) {
-			if(imported instanceof FunctionEntity) {
-				file.addRelation(buildRelation(file,DependencyType.CALL,imported));
-			} else if(imported instanceof MultiDeclareEntities) {
-				for(Entity multi : ((MultiDeclareEntities) imported).getEntities()) {
+		for(Entity func : importedfuncntion) {
+			if(func instanceof FunctionEntity) {
+				file.addRelation(buildRelation(file,DependencyType.CALL,func));
+			} else if(func instanceof MultiDeclareEntities) {
+				for(Entity multi : ((MultiDeclareEntities) func).getEntities()) {
 					if(multi instanceof FunctionEntity && imports.contains(multi.getAncestorOfType(FileEntity.class))) {
-						file.addRelation(buildRelation(file,DependencyType.CALL,imported));
+						file.addRelation(buildRelation(file,DependencyType.CALL,func));
 					}
 				}
+			}
+		}
+
+		Collection<Entity> importedType = file.getImportedTypes();
+		for(Entity type : importedType) {
+			if(type.getClass() == TypeEntity.class) {
+				file.addRelation(buildRelation(file,DependencyType.USE,type));
 			}
 		}
 	}
