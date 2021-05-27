@@ -26,13 +26,14 @@ public class FunctionEntityImpl extends FunctionEntity {
 
 	private void solveReloadFunction(){
 		String implSignature = this.getArgSignature();
-		if(implementedFunction instanceof FunctionEntity &&
+		if(implementedFunction instanceof FunctionEntityProto &&
 				(((FunctionEntity) implementedFunction).getArgSignature().equals(this.getArgSignature())))	{
 			return ;
 		}
 		if(implementedFunction.getMutliDeclare() != null){
 			for(Entity entity : implementedFunction.getMutliDeclare().getEntities()){
-				if(entity instanceof FunctionEntity){
+				if(entity instanceof FunctionEntityProto){
+					implementedFunction = entity;
 					if(((FunctionEntity) entity).getArgSignature().equals(implSignature)){
 						implementedFunction =  entity;
 						return ;

@@ -288,7 +288,7 @@ public class Inferer {
 		if (nameIndex >= names.length) {
 			return precendenceEntity;
 		}
-		if (nameIndex == -1) {
+		if (nameIndex < 0) {
 			//System.err.println("error");
 			return null;
 		}
