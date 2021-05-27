@@ -223,6 +223,14 @@ public abstract class ContainerEntity extends DecoratedEntity {
 
 
 				Entity entity = inferer.resolveName(this, expression.getIdentifier(), true);
+				if(expression.isCall() && entity instanceof TypeEntity) {
+					for(Entity func : ((TypeEntity) entity).getFunctions()) {
+						if(func.getRawName().getName().equals(entity.getRawName().getName())) {
+							entity = func;
+							break;
+						}
+					}
+				}
 				String composedName = expression.getIdentifier().toString();
 				Expression theExpr = expression;
 				if (entity==null) {
