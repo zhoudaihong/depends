@@ -285,10 +285,10 @@ public class CppVisitor  extends ASTVisitor {
 		
 		if (declaration instanceof ICPPASTUsingDeclaration) {
 			String ns = ASTStringUtilExt.getName((ICPPASTUsingDeclaration)declaration);
-			if(declaration.getParent() != null) {
+			if(!ns.startsWith(".") && declaration.getParent() != null) {
 				IASTNode curNs = declaration.getParent();
 				if(curNs instanceof ICPPASTNamespaceDefinition) {
-					ns = ((ICPPASTNamespaceDefinition)(curNs)).getName().toString().replace("::", ".") + "." + ns;
+					ns = ((ICPPASTNamespaceDefinition)(curNs)).getName().toString().replace("::", ".") + "#&" + ns;
 				}
 				while(curNs.getParent() != null) {
 					curNs = curNs.getParent();
