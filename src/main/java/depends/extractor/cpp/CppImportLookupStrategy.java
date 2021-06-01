@@ -37,6 +37,7 @@ import depends.entity.repo.EntityRepo;
 import depends.extractor.UnsolvedBindings;
 import depends.importtypes.FileImport;
 import depends.importtypes.Import;
+import depends.importtypes.UsingImport;
 import depends.relations.ImportLookupStrategy;
 import depends.relations.Inferer;
 
@@ -152,10 +153,18 @@ public class CppImportLookupStrategy implements ImportLookupStrategy {
 		ArrayList<Entity> result = new ArrayList<>();
 		for (Import importedItem:importedList) {
 			if (!(importedItem instanceof FileImport)) {
-				Entity imported = repo.getEntity(importedItem.getContent());
+				String importContent = importedItem.getContent();
+				Entity imported = repo.getEntity(importContent.replace("#&", "."));
 				if (imported==null) {
-					unsolvedBindings.add(new UnsolvedBindings(importedItem.getContent(),null));
-					continue;
+					if(importedItem instanceof UsingImport) {
+						if(importContent.lastIndexOf("&") != -1) {
+							imported = repo.getEntity(importContent.substring(importContent.lastIndexOf("&") + 1));
+						}
+					}
+					if (imported==null) {
+						unsolvedBindings.add(new UnsolvedBindings(importContent,null));
+						continue;
+					}
 				}
 				result.add(imported);
 			}

@@ -151,7 +151,9 @@ public abstract class HandlerContext {
 			方便表达式替换关键字
 		 */
 		if(imported instanceof UsingImport) {
-			String newName = imported.getContent();
+			String importContent = imported.getContent();
+			int charIndex = importContent.lastIndexOf("&");
+			String newName = charIndex == -1 ? importContent :  importContent.substring(charIndex + 1);
 			String curName = newName.substring(newName.lastIndexOf(".") + 1);
 			currentFileEntity.UsingReflection().put(curName, newName);
 		}
