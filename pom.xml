@@ -94,6 +94,8 @@
             <groupId>eclipse-photon</groupId>
             <artifactId>org.eclipse.core.resources</artifactId>
             <version>3.14.0.v20210215-0934</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/jars/org.eclipse.core.resources-3.14.0.v20210215-0934.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -133,36 +135,50 @@
             <groupId>org.eclipse.cdt</groupId>
             <artifactId>cdt-core</artifactId>
             <version>7.2.0.202102251239</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/jars/cdt-core-7.2.0.202102251239.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>eclipse-photon</groupId>
             <artifactId>org.eclipse.equinox.registry</artifactId>
             <version>3.10.100.v20210212-1143</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/jars/org.eclipse.equinox.registry-3.10.100.v20210212-1143.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>eclipse-photon</groupId>
             <artifactId>org.eclipse.core.runtime</artifactId>
             <version>3.20.100.v20210111-0815</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/jars/org.eclipse.core.runtime-3.20.100.v20210111-0815.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>eclipse-photon</groupId>
             <artifactId>org.eclipse.equinox.common</artifactId>
             <version>3.14.100.v20210212-1143</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/jars/org.eclipse.equinox.common-3.14.100.v20210212-1143.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>eclipse-photon</groupId>
             <artifactId>org.eclipse.osgi</artifactId>
             <version>3.16.200.v20210226-1447</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/jars/org.eclipse.osgi-3.16.200.v20210226-1447.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>eclipse-photon</groupId>
             <artifactId>org.eclipse.equinox.preferences</artifactId>
             <version>3.8.200.v20210212-1143</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/jars/org.eclipse.equinox.preferences-3.8.200.v20210212-1143.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>eclipse-photon</groupId>
             <artifactId>org.eclipse.core.jobs</artifactId>
             <version>3.10.1100.v20210111-0815</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/jars/org.eclipse.core.jobs-3.10.1100.v20210111-0815.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>info.picocli</groupId>
