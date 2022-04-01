@@ -24,9 +24,7 @@ SOFTWARE.
 
 package depends.extractor.java;
 
-import depends.entity.Entity;
-import depends.entity.MultiDeclareEntities;
-import depends.entity.PackageEntity;
+import depends.entity.*;
 import depends.entity.repo.EntityRepo;
 import depends.extractor.HandlerContext;
 import depends.relations.Inferer;
@@ -67,5 +65,11 @@ public class JavaHandlerContext extends HandlerContext {
 		((PackageEntity)pkgEntity).setJavaPath(path);
 		entityRepo.add(pkgEntity);
 		return pkgEntity;
+	}
+
+	public BlockEntity foundNewBlock(GenericName simpleName, boolean isStatic) {
+		BlockEntity blockEntity = new BlockEntity(simpleName, lastContainer(), idGenerator.generateId(), isStatic);
+		entityRepo.add(blockEntity);
+		return blockEntity;
 	}
 }

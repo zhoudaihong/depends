@@ -363,6 +363,15 @@ public class JavaListener extends JavaParserBaseListener {
 	@Override
 	public void enterBlock(BlockContext ctx) {
 		// TODO support block in java
+		ParserRuleContext parent = ctx.getParent();
+		if(parent instanceof ClassBodyDeclarationContext) {
+			ParseTree child0 = parent.getChild(0);
+			if(child0.toString().equals("static")) {
+				BlockEntity blockEntity = context.foundNewBlock(new GenericName("staticblock" + ctx.getStart().getLine()),true);
+				blockEntity.setStartLine(ctx.getStart().getLine());
+				blockEntity.setEndLine(ctx.getStop().getLine());
+			}
+		}
 		super.enterBlock(ctx);
 	}
 
