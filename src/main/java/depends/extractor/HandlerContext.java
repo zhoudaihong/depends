@@ -30,13 +30,13 @@ import depends.entity.repo.IdGenerator;
 import depends.importtypes.Import;
 import depends.importtypes.UsingImport;
 import depends.relations.Inferer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class HandlerContext {
 	protected EntityRepo entityRepo;
@@ -256,8 +256,14 @@ public abstract class HandlerContext {
 	}
 
 
-	public List<VarEntity> foundVarDefinitions(List<String> varNames, String type, List<GenericName> typeArguments, Integer line) {
-		return varNames.stream().map(item->foundVarDefinition(item,GenericName.build(type),typeArguments,line)).collect(Collectors.toList());
+	public List<VarEntity> foundVarDefinitions(List<String> varNames, String type, List<GenericName> typeArguments, Integer line, boolean needPush) {
+		List<VarEntity> varEntities =  varNames.stream().map(item->foundVarDefinition(item,GenericName.build(type),typeArguments,line)).collect(Collectors.toList());
+		if(needPush) {
+			for (VarEntity varEntity : varEntities) {
+				pushToStack(varEntity);
+			}
+		}
+		return varEntities;
 	}
 	
 	public VarEntity foundVarDefinition(ContainerEntity container,String varName,Integer line) {
@@ -296,7 +302,7 @@ public abstract class HandlerContext {
 		VarEntity var = new VarEntity(GenericName.build(varName), type, lastContainer(), idGenerator.generateId());
 		var.setStartLine(line);
 		var.addTypeParameter(typeArguments);
-		lastContainer().addVar(var);	
+		lastContainer().addVar(var);
 		addToRepo(var);
 		return var;
 	}

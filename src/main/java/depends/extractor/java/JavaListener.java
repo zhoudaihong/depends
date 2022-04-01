@@ -30,6 +30,8 @@ import depends.extractor.java.JavaParser.*;
 import depends.extractor.java.context.*;
 import depends.importtypes.ExactMatchImport;
 import depends.relations.Inferer;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -194,10 +196,10 @@ public class JavaListener extends JavaParserBaseListener {
 		
 		BlockContext block = ctx.methodBody().block();
 		if(block != null) {
-			method.setStartLine(block.start.getLine());
+//			method.setStartLine(block.start.getLine());
 			method.setEndLine(block.stop.getLine());
 		} else {
-			method.setStartLine(ctx.start.getLine());
+//			method.setStartLine(ctx.start.getLine());
 			method.setEndLine(ctx.stop.getLine());
 		}
 	}
@@ -230,10 +232,10 @@ public class JavaListener extends JavaParserBaseListener {
 		
 		BlockContext block = ctx.methodBody().block();
 		if(block != null) {
-			method.setStartLine(block.start.getLine());
+//			method.setStartLine(block.start.getLine());
 			method.setEndLine(block.stop.getLine());
 		} else {
-			method.setStartLine(ctx.start.getLine());
+//			method.setStartLine(ctx.start.getLine());
 			method.setEndLine(ctx.stop.getLine());
 		}
 	}
@@ -256,10 +258,10 @@ public class JavaListener extends JavaParserBaseListener {
 		
 		BlockContext block = ctx.block();
 		if(block != null) {
-			method.setStartLine(block.start.getLine());
+//			method.setStartLine(block.start.getLine());
 			method.setEndLine(block.stop.getLine());
 		} else {
-			method.setStartLine(ctx.start.getLine());
+//			method.setStartLine(ctx.start.getLine());
 			method.setEndLine(ctx.stop.getLine());
 		}
 	}
@@ -277,18 +279,36 @@ public class JavaListener extends JavaParserBaseListener {
 		List<String> varNames = VariableDeclaratorsContextHelper.getVariables(ctx.variableDeclarators());
 		String type = ClassTypeContextHelper.getClassName(ctx.typeType());
 		List<GenericName> typeArguments = ClassTypeContextHelper.getTypeArguments(ctx.typeType());
-		List<VarEntity> vars = context.foundVarDefinitions(varNames, type,typeArguments,ctx.getStart().getLine());
+		List<VarEntity> vars = context.foundVarDefinitions(varNames, type,typeArguments,ctx.getStart().getLine(), true);
+		for(VarEntity var : vars) {
+			if(ctx.getStop() != null) {
+				var.setEndLine(ctx.getStop().getLine());
+			} else {
+				var.setEndLine(ctx.getStart().getLine());
+			}
+		}
 		annotationProcessor.processAnnotationModifier(ctx, ClassBodyDeclarationContext.class,"modifier.classOrInterfaceModifier.annotation",vars);
 		super.enterFieldDeclaration(ctx);
 	}
-	
 
+	@Override
+	public void exitFieldDeclaration(FieldDeclarationContext ctx) {
+		exitLastEntity();
+		super.exitFieldDeclaration(ctx);
+	}
 
 	@Override
 	public void enterConstDeclaration(ConstDeclarationContext ctx) {
 		List<GenericName> typeArguments = ClassTypeContextHelper.getTypeArguments(ctx.typeType());
 		List<VarEntity> vars = context.foundVarDefinitions(VariableDeclaratorsContextHelper.getVariables(ctx.constantDeclarator()),
-				ClassTypeContextHelper.getClassName(ctx.typeType()),typeArguments, ctx.getStart().getLine());
+				ClassTypeContextHelper.getClassName(ctx.typeType()),typeArguments, ctx.getStart().getLine(), false);
+		for(VarEntity var : vars) {
+			if(ctx.getStop() != null) {
+				var.setEndLine(ctx.getStop().getLine());
+			} else {
+				var.setEndLine(ctx.getStart().getLine());
+			}
+		}
 		annotationProcessor.processAnnotationModifier(ctx, InterfaceBodyDeclarationContext.class,"modifier.classOrInterfaceModifier.annotation",vars);
 		super.enterConstDeclaration(ctx);
 	}
@@ -296,7 +316,12 @@ public class JavaListener extends JavaParserBaseListener {
 	@Override
 	public void enterEnumConstant(EnumConstantContext ctx) {
 		if (ctx.IDENTIFIER() != null) {
-			context.foundEnumConstDefinition(ctx.IDENTIFIER().getText(),ctx.getStart().getLine());
+			VarEntity var = context.foundEnumConstDefinition(ctx.IDENTIFIER().getText(),ctx.getStart().getLine());
+			if(ctx.getStop() != null) {
+				var.setEndLine(ctx.getStop().getLine());
+			} else {
+				var.setEndLine(ctx.getStart().getLine());
+			}
 		}
 		super.enterEnumConstant(ctx);
 	}
@@ -317,7 +342,14 @@ public class JavaListener extends JavaParserBaseListener {
 	@Override
 	public void enterAnnotationConstantRest(AnnotationConstantRestContext ctx) {
 		// TODO: no variable type defined in annotation const？
-		context.foundVarDefinitions(VariableDeclaratorsContextHelper.getVariables(ctx.variableDeclarators()), "", new ArrayList<>(), ctx.getStart().getLine());
+		List<VarEntity> vars = context.foundVarDefinitions(VariableDeclaratorsContextHelper.getVariables(ctx.variableDeclarators()), "", new ArrayList<>(), ctx.getStart().getLine(), false);
+		for(VarEntity var : vars) {
+			if(ctx.getStop() != null) {
+				var.setEndLine(ctx.getStop().getLine());
+			} else {
+				var.setEndLine(ctx.getStart().getLine());
+			}
+		}
 		super.enterAnnotationConstantRest(ctx);
 	}
 
@@ -327,16 +359,29 @@ public class JavaListener extends JavaParserBaseListener {
 	@Override
 	public void enterLocalVariableDeclaration(LocalVariableDeclarationContext ctx) {
 		List<GenericName> typeArguments = ClassTypeContextHelper.getTypeArguments(ctx.typeType());
-		context.foundVarDefinitions(VariableDeclaratorsContextHelper.getVariables((ctx.variableDeclarators())),
-				ClassTypeContextHelper.getClassName(ctx.typeType()), typeArguments, ctx.getStart().getLine());
-
+		List<VarEntity> vars = context.foundVarDefinitions(VariableDeclaratorsContextHelper.getVariables((ctx.variableDeclarators())),
+				ClassTypeContextHelper.getClassName(ctx.typeType()), typeArguments, ctx.getStart().getLine(), false);
+		for(VarEntity var : vars) {
+			if(ctx.getStop() != null) {
+				var.setEndLine(ctx.getStop().getLine());
+			} else {
+				var.setEndLine(ctx.getStart().getLine());
+			}
+		}
 		super.enterLocalVariableDeclaration(ctx);
 	}
 
 	public void enterEnhancedForControl(EnhancedForControlContext ctx) {
 		List<GenericName> typeArguments = ClassTypeContextHelper.getTypeArguments(ctx.typeType());
-		context.foundVarDefinitions(VariableDeclaratorsContextHelper.getVariable((ctx.variableDeclaratorId())),
-				ClassTypeContextHelper.getClassName(ctx.typeType()), typeArguments, ctx.getStart().getLine());
+		List<VarEntity> vars = context.foundVarDefinitions(VariableDeclaratorsContextHelper.getVariable((ctx.variableDeclaratorId())),
+				ClassTypeContextHelper.getClassName(ctx.typeType()), typeArguments, ctx.getStart().getLine(), false);
+		for(VarEntity var : vars) {
+			if(ctx.getStop() != null) {
+				var.setEndLine(ctx.getStop().getLine());
+			} else {
+				var.setEndLine(ctx.getStart().getLine());
+			}
+		}
 		super.enterEnhancedForControl(ctx);
 	}
 
@@ -346,8 +391,13 @@ public class JavaListener extends JavaParserBaseListener {
 	@Override
 	public void enterResource(ResourceContext ctx) {
 		List<GenericName> typeArguments = ClassTypeContextHelper.getTypeArguments(ctx.classOrInterfaceType());
-		context.foundVarDefinition(ctx.variableDeclaratorId().IDENTIFIER().getText(),
+		VarEntity var = context.foundVarDefinition(ctx.variableDeclaratorId().IDENTIFIER().getText(),
 				GenericName.build(IdentifierContextHelper.getName(ctx.classOrInterfaceType().IDENTIFIER())), typeArguments,ctx.getStart().getLine());
+		if(ctx.getStop() != null) {
+			var.setEndLine(ctx.getStop().getLine());
+		} else {
+			var.setEndLine(ctx.getStart().getLine());
+		}
 		super.enterResource(ctx);
 	}
 
