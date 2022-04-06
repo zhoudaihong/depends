@@ -24,26 +24,20 @@ SOFTWARE.
 
 package depends.relations;
 
-import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 import depends.entity.*;
-import depends.extractor.java.JavaImportLookupStrategy;
-import depends.extractor.java.JavaProcessor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import depends.entity.repo.BuiltInType;
 import depends.entity.repo.EntityRepo;
 import depends.entity.repo.NullBuiltInType;
 import depends.extractor.AbstractLangProcessor;
 import depends.extractor.UnsolvedBindings;
+import depends.extractor.java.JavaImportLookupStrategy;
+import depends.extractor.java.JavaProcessor;
 import depends.importtypes.Import;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.management.ManagementFactory;
+import java.util.*;
 
 public class Inferer {
 	static final public TypeEntity buildInType = new TypeEntity(GenericName.build("built-in"), null, -1);
@@ -333,11 +327,25 @@ public class Inferer {
 		while (true) {
 			Entity entity = fromEntity.getByName(name, new HashSet<>());
 			if (entity!=null) return entity;
+			if (fromEntity instanceof PackageEntity && fromEntity.getMutliDeclare() != null) {
+				entity = findEntityInMultiPackages(fromEntity.getMutliDeclare(), name);
+				if(entity != null) {
+					return entity;
+				}
+			}
 			fromEntity = fromEntity.getParent();
 			if (fromEntity == null)
 				break;
 		}
 		return null;
+	}
+
+	private Entity findEntityInMultiPackages(MultiDeclareEntities multiDeclareEntities, String name) {
+		Entity res = null;
+		for(Entity entity : multiDeclareEntities.getEntities()) {
+			res = entity.getByName(name, new HashSet<>());
+		}
+		return res;
 	}
 
 	/**
