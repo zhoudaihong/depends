@@ -341,11 +341,12 @@ public class Inferer {
 	}
 
 	private Entity findEntityInMultiPackages(MultiDeclareEntities multiDeclareEntities, String name) {
-		Entity res = null;
+		Entity res;
 		for(Entity entity : multiDeclareEntities.getEntities()) {
 			res = entity.getByName(name, new HashSet<>());
+			if(res != null) return res;
 		}
-		return res;
+		return null;
 	}
 
 	/**
