@@ -106,8 +106,9 @@ public abstract class Entity {
     public void addRelation(Relation relation) {
     	if (relations==null)
     		relations = new ArrayList<>();
-    	if (relation.getEntity()==null) return;
+    	if (relation.getEntity()==null || relation.getEntity().getQualifiedName().equals("built-in")) return;
         relations.add(relation);
+        relation.getEntity().addDependedRelations(this, relation);
     }
 
     public ArrayList<Relation> getRelations() {
@@ -303,5 +304,91 @@ public abstract class Entity {
 			String newName = preName.substring(0, preName.lastIndexOf(grandson.getParent().getRawName().getName() + ".")) + grandson.getRawName().getName();
 			visibleNames.put(newName, grandson);
 		}
+	}
+
+	ArrayList<Relation> dependedRelations;
+
+	public void addDependedRelations(Entity relatedEntity, Relation relation) {
+		if(dependedRelations == null)
+			dependedRelations = new ArrayList<>();
+		dependedRelations.add(new Relation(relation.getType() + "edBy", relatedEntity, relation.getLocation()));
+	}
+
+	public ArrayList<Relation> getDependedRelations() {
+		if(dependedRelations == null)
+			dependedRelations = new ArrayList<>();
+		return dependedRelations;
+	}
+
+
+	public List<Entity> findDescendantContainers () {
+		List<Entity> descendantContainers = new LinkedList<>(){
+		};
+		Queue<Entity> tree = new LinkedList<>();
+		tree.offer(this);
+		while(tree.size() != 0) {
+			Entity node = tree.poll();
+			if(node instanceof FunctionEntity) descendantContainers.add((FunctionEntity) node);
+			if(node instanceof BlockEntity) descendantContainers.add((BlockEntity) node);
+			if(node instanceof VarEntity && node.getParent() instanceof TypeEntity) descendantContainers.add( node);
+			for(Entity child : node.getChildren()) {
+				tree.offer(child);
+			}
+		}
+		Collections.sort(descendantContainers, new Comparator<Entity>() {
+			@Override
+			public int compare(Entity o1, Entity o2) {
+				return o1.getStartLine() - o2.getStartLine();
+			}
+		});
+		return descendantContainers;
+	}
+
+	public List<Entity> findInnerClass () {
+		List<Entity> InnerClass = new LinkedList<>(){
+		};
+		Queue<Entity> tree = new LinkedList<>();
+		tree.offer(this);
+		while(tree.size() != 0) {
+			Entity node = tree.poll();
+			if(node.getClass() == TypeEntity.class) {
+				if(node.getParent() != null && node.getParent().getClass() == TypeEntity.class) InnerClass.add((TypeEntity) node);
+			}
+			for(Entity child : node.getChildren()) {
+				tree.offer(child);
+			}
+		}
+		Collections.sort(InnerClass, new Comparator<Entity>() {
+			@Override
+			public int compare(Entity o1, Entity o2) {
+				return o1.getStartLine() - o2.getStartLine();
+			}
+		});
+		return InnerClass;
+	}
+
+	public List<VarEntity> findFields () {
+		List<VarEntity> descendantFields = new LinkedList<>(){
+		};
+		Queue<Entity> tree = new LinkedList<>();
+		tree.offer(this);
+		while(tree.size() != 0) {
+			Entity node = tree.poll();
+			if(node instanceof TypeEntity) {
+				for(VarEntity field : ((TypeEntity)node).getVars()) {
+					descendantFields.add((VarEntity) field);
+				}
+			}
+			for(Entity child : node.getChildren()) {
+				if(node instanceof FileEntity || node instanceof TypeEntity || node instanceof PackageEntity) tree.offer(child);
+			}
+		}
+		Collections.sort(descendantFields, new Comparator<VarEntity>() {
+			@Override
+			public int compare(VarEntity o1, VarEntity o2) {
+				return o1.getStartLine() - o2.getStartLine();
+			}
+		});
+		return descendantFields;
 	}
 }

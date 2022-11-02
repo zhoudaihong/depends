@@ -61,4 +61,8 @@ public class Relation {
 		if (location==null) return null;
 		return location.getEndLine();
 	}
+
+	public Location getLocation() {
+		return location;
+	}
 }

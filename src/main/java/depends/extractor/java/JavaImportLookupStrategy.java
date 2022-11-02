@@ -24,11 +24,6 @@ SOFTWARE.
 
 package depends.extractor.java;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 import depends.entity.Entity;
 import depends.entity.FileEntity;
 import depends.entity.MultiDeclareEntities;
@@ -39,6 +34,10 @@ import depends.extractor.UnsolvedBindings;
 import depends.importtypes.Import;
 import depends.relations.ImportLookupStrategy;
 import depends.relations.Inferer;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 public class JavaImportLookupStrategy implements ImportLookupStrategy{
 	@Override
@@ -99,6 +98,7 @@ public class JavaImportLookupStrategy implements ImportLookupStrategy{
 
 	//for multideclareentities
 	public List<Entity> getImportedTypes(List<Import> importedList, EntityRepo repo, Set<UnsolvedBindings> unsolvedBindings,FileEntity fileEntity) {
+
 		ArrayList<Entity> result = new ArrayList<>();
 		for (Import importedItem:importedList) {
 			Entity imported = repo.getEntity(importedItem.getContent());
@@ -108,9 +108,21 @@ public class JavaImportLookupStrategy implements ImportLookupStrategy{
 			}
 			if(imported instanceof MultiDeclareEntities){
 				List<Entity> temp = MultiDeclareResolve.selectMostRelative((MultiDeclareEntities) imported,fileEntity);
-				result.addAll(temp);
-			}
-			if (imported instanceof PackageEntity) {
+				for(Entity entity : temp) {
+					if (entity instanceof PackageEntity) {
+						//expand import of package to all classes under the package due to we dis-courage the behavior
+						for (Entity child:entity.getChildren()) {
+							if (child instanceof FileEntity) {
+								child.getChildren().forEach(item->result.add(item));
+							}else {
+								result.add(child);
+							}
+						}
+					}else {
+						result.add(entity);
+					}
+				}
+			}else if (imported instanceof PackageEntity) {
 				//expand import of package to all classes under the package due to we dis-courage the behavior
 				for (Entity child:imported.getChildren()) {
 					if (child instanceof FileEntity) {

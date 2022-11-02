@@ -24,21 +24,15 @@ SOFTWARE.
 
 package depends.extractor.java.context;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.antlr.v4.runtime.tree.TerminalNode;
-
 import depends.entity.FunctionEntity;
 import depends.entity.GenericName;
 import depends.entity.VarEntity;
 import depends.entity.repo.IdGenerator;
-import depends.extractor.java.JavaParser.FormalParameterContext;
-import depends.extractor.java.JavaParser.FormalParameterListContext;
-import depends.extractor.java.JavaParser.FormalParametersContext;
-import depends.extractor.java.JavaParser.LastFormalParameterContext;
-import depends.extractor.java.JavaParser.TypeTypeContext;
-import depends.extractor.java.JavaParser.VariableModifierContext;
+import depends.extractor.java.JavaParser.*;
+import org.antlr.v4.runtime.tree.TerminalNode;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class FormalParameterListContextHelper {
 
@@ -102,7 +96,7 @@ public class FormalParameterListContextHelper {
 		GenericName varName = GenericName.build(identifier.getText());
 		VarEntity varEntity = new VarEntity(varName,type,container,idGenerator.generateId());
 		container.addParameter(varEntity);
-		
+		container.addToArgSignature("_" + varEntity.getRawType());
 		for ( VariableModifierContext modifier:variableModifier) {
 			if (modifier.annotation()!=null) {
 				this.annotations.add(QualitiedNameContextHelper.getName(modifier.annotation().qualifiedName()));
