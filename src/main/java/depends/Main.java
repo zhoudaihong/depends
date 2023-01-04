@@ -24,56 +24,45 @@ SOFTWARE.
 
 package depends;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import org.codehaus.plexus.util.StringUtils;
-
 import depends.addons.DV8MappingFileBuilder;
 import depends.extractor.AbstractLangProcessor;
 import depends.extractor.LangProcessorRegistration;
-import depends.extractor.UnsolvedBindings;
-import depends.format.DependencyDumper;
-import depends.format.detail.UnsolvedSymbolDumper;
-import multilang.depends.util.file.path.DotPathFilenameWritter;
-import multilang.depends.util.file.path.EmptyFilenameWritter;
-import multilang.depends.util.file.path.FilenameWritter;
-import multilang.depends.util.file.path.UnixPathFilenameWritter;
-import multilang.depends.util.file.path.WindowsPathFilenameWritter;
 import depends.generator.DependencyGenerator;
 import depends.generator.FileDependencyGenerator;
 import depends.generator.FunctionDependencyGenerator;
-import depends.matrix.core.DependencyMatrix;
-import depends.matrix.transform.MatrixLevelReducer;
-import multilang.depends.util.file.strip.LeadingNameStripper;
+import edu.emory.mathcs.backport.java.util.Arrays;
 import multilang.depends.util.file.FileUtil;
 import multilang.depends.util.file.FolderCollector;
 import multilang.depends.util.file.TemporaryFile;
-import edu.emory.mathcs.backport.java.util.Arrays;
+import multilang.depends.util.file.path.*;
+import multilang.depends.util.file.strip.LeadingNameStripper;
 import net.sf.ehcache.CacheManager;
+import org.codehaus.plexus.util.StringUtils;
 import picocli.CommandLine;
 import picocli.CommandLine.PicocliException;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Main {
 
 	public static void main(String[] args) {
 		try {
 			List<String> commands = new ArrayList<>();
-			commands.add("-d");
-			commands.add("D:\\FDSE");  // 分析结果要存的目录
-			commands.add("-f");
-			commands.add("plantuml");
-//          commands.add("-i");
-//          commands.add("D:\\software\\cloc\\cJSON-1.7.12");
-			commands.add("java");
-//          commands.add("D:\\my_data\\c_demo\\tabix"); // 要分析的项目路径
-            commands.add("D:\\FDSE\\multi-dependency");
-//			commands.add("D:\\my_data\\cpp_project\\leveldb-1.22-maked");
-			commands.add("test_depends_data");  // 分析结果的文件名
-			commands.add("--auto-include");
-			args = new String[commands.size()];
+//			commands.add("-d");
+//			commands.add("V:\\data\\dependsdata");  // 分析结果要存的目录
+//			commands.add("-f");
+//			commands.add("plantuml");
+////          commands.add("-i");
+////          commands.add("D:\\software\\cloc\\cJSON-1.7.12");
+//			commands.add("java");
+////          commands.add("D:\\my_data\\c_demo\\tabix"); // 要分析的项目路径
+//            commands.add("V:\\program\\tomcat");
+////			commands.add("D:\\my_data\\cpp_project\\leveldb-1.22-maked");
+//			commands.add("test_depends_data_cassandra");  // 分析结果的文件名
+//			commands.add("--auto-include");
+//			args = new String[commands.size()];
 			commands.toArray(args);
 			LangRegister langRegister = new LangRegister();
 			langRegister.register();
