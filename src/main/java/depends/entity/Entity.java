@@ -48,12 +48,14 @@ public abstract class Entity {
 	private boolean inScope = true;
 	protected HashMap<String, Entity> visibleNames = new HashMap<>();
 	private Location location = new Location();
+	private List<String> modifiers;
 	public Entity() {};
     public Entity(GenericName rawName, Entity parent, Integer id) {
 		this.qualifiedName = null;
 		this.rawName = rawName;
 		this.parent = parent;
 		this.id = id;
+		this.modifiers = new ArrayList<>();
 		if (parent!=null)
 			parent.addChild(this);
 		deduceQualifiedName();
@@ -390,5 +392,9 @@ public abstract class Entity {
 			}
 		});
 		return descendantFields;
+	}
+
+	public void addModifier(String modifier) {
+		modifiers.add(modifier);
 	}
 }

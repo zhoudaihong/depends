@@ -75,6 +75,10 @@ public class JavaListener extends JavaParserBaseListener {
 	public void enterClassDeclaration(ClassDeclarationContext ctx) {
 		if (ctx.IDENTIFIER()==null) return;
 		TypeEntity type = context.foundNewType(GenericName.build(ctx.IDENTIFIER().getText()), ctx.getStart().getLine(), ctx.getStop().getLine());
+
+		// 处理修饰符
+		processModifiers(ctx, type);
+
 		// implements
 		if (ctx.typeList() != null) {
 			for (int i = 0; i < ctx.typeList().typeType().size(); i++) {
@@ -186,6 +190,10 @@ public class JavaListener extends JavaParserBaseListener {
 		String methodName = ctx.IDENTIFIER().getText();
 		String returnedType = ClassTypeContextHelper.getClassName(ctx.typeTypeOrVoid());
 		FunctionEntity method = context.foundMethodDeclarator(methodName, returnedType, throwedType,ctx.getStart().getLine());
+
+		// 处理修饰符
+		processModifiers(ctx, method);
+
 		new FormalParameterListContextHelper(ctx.formalParameters(), method, entityRepo);
 		if (ctx.typeParameters() != null) {
 			List<GenericName> parameters = TypeParameterContextHelper.getTypeParameters(ctx.typeParameters());
@@ -281,6 +289,10 @@ public class JavaListener extends JavaParserBaseListener {
 		List<GenericName> typeArguments = ClassTypeContextHelper.getTypeArguments(ctx.typeType());
 		List<VarEntity> vars = context.foundVarDefinitions(varNames, type,typeArguments,ctx.getStart().getLine(), true);
 		for(VarEntity var : vars) {
+
+			// 处理修饰符
+			processModifiers(ctx, var);
+
 			if(ctx.getStop() != null) {
 				var.setEndLine(ctx.getStop().getLine());
 			} else {
@@ -441,6 +453,18 @@ public class JavaListener extends JavaParserBaseListener {
 				}
 			}
 			context.currentType().addTypeParameter(GenericName.build(typeParam.IDENTIFIER().getText()));
+		}
+	}
+
+	private void processModifiers(ParserRuleContext ctx, Entity entity) {
+		ParserRuleContext parent = ctx.getParent();
+		if (ctx instanceof FieldDeclarationContext | ctx instanceof MethodDeclarationContext) parent = parent.getParent();
+		for (ParseTree child : parent.children) {
+			if (child instanceof ClassOrInterfaceModifierContext) {
+				entity.addModifier(child.getText());
+			} else if (child instanceof ModifierContext) {
+				entity.addModifier(child.getText());
+			}
 		}
 	}
 
