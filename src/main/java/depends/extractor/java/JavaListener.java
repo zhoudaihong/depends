@@ -458,7 +458,9 @@ public class JavaListener extends JavaParserBaseListener {
 
 	private void processModifiers(ParserRuleContext ctx, Entity entity) {
 		ParserRuleContext parent = ctx.getParent();
-		if (ctx instanceof FieldDeclarationContext | ctx instanceof MethodDeclarationContext) parent = parent.getParent();
+		if (parent instanceof MemberDeclarationContext) {
+			parent = parent.getParent();
+		}
 		for (ParseTree child : parent.children) {
 			if (child instanceof ClassOrInterfaceModifierContext) {
 				entity.addModifier(child.getText());
