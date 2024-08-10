@@ -24,11 +24,11 @@ SOFTWARE.
 
 package depends.entity;
 
+import depends.relations.Inferer;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import depends.relations.Inferer;
 
 public class FunctionEntity extends ContainerEntity{
 	private List<GenericName> returnTypeIdentifiers = new ArrayList<>();
@@ -89,7 +89,18 @@ public class FunctionEntity extends ContainerEntity{
 			}
 		}
 		if (returnTypes.size()<returnTypeIdentifiers.size()) {
-			returnTypes = identiferToEntities(inferer,this.returnTypeIdentifiers);
+			returnTypes = identiferToEntities(inferer, this.returnTypeIdentifiers);
+
+			Collection<Entity> updatedReturnTypes = new ArrayList<>();
+			for (Entity returnType : returnTypes) {
+				if (returnType instanceof FunctionEntity &&
+						((FunctionEntity) returnType).getRawName().equals(returnType.getParent().getRawName())) {
+					returnType = returnType.getParent();
+				}
+				updatedReturnTypes.add(returnType);
+			}
+			returnTypes = updatedReturnTypes;
+
 			for ( GenericName returnTypeName: returnTypeIdentifiers) {
 				Collection<Entity> typeEntities = typeParametersToEntities(inferer, returnTypeName);
 				this.appendTypeParameters(typeEntities);
