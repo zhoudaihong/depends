@@ -397,4 +397,12 @@ public abstract class Entity {
 	public void addModifier(String modifier) {
 		modifiers.add(modifier);
 	}
+
+	public List<String> getModifiers() {
+		return modifiers;
+	}
+
+	public String getModifiersAsString() {
+		return String.join("_", modifiers);
+	}
 }
