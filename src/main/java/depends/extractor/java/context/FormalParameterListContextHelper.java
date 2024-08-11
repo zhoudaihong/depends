@@ -92,9 +92,11 @@ public class FormalParameterListContextHelper {
 	}
 
 	private VarEntity foundParameterDefintion(TypeTypeContext typeType, TerminalNode identifier, List<VariableModifierContext> variableModifier) {
+		List<GenericName> typeArguments = ClassTypeContextHelper.getTypeArguments(typeType);
 		GenericName type = GenericName.build(ClassTypeContextHelper.getClassName(typeType));
 		GenericName varName = GenericName.build(identifier.getText());
 		VarEntity varEntity = new VarEntity(varName,type,container,idGenerator.generateId());
+		varEntity.addTypeParameter(typeArguments);
 		container.addParameter(varEntity);
 		container.addToArgSignature("_" + varEntity.getRawType());
 		for ( VariableModifierContext modifier:variableModifier) {
